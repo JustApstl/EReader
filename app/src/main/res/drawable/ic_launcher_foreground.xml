@@ -1,0 +1,31 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Modern Book Icon with better design -->
+    <!-- Book cover (left page) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,30c-3.31,0 -6,2.69 -6,6v42c0,3.31 2.69,6 6,6h28V30H20z" />
+    <!-- Book back (right page) -->
+    <path
+        android:fillColor="#E3F2FD"
+        android:pathData="M48,30v54h28c3.31,0 6,-2.69 6,-6V36c0,-3.31 -2.69,-6 -6,-6H48z" />
+    <!-- Center spine -->
+    <path
+        android:fillColor="#BBDEFB"
+        android:pathData="M48,30h3v54h-3z" />
+    <!-- Page decorative lines on left page -->
+    <path
+        android:fillColor="#64B5F6"
+        android:pathData="M28,42h12v2h-12zM28,48h14v2h-14zM28,54h12v2h-12z" />
+    <!-- Page decorative lines on right page -->
+    <path
+        android:fillColor="#64B5F6"
+        android:pathData="M56,42h12v2h-12zM56,48h14v2h-14zM56,54h12v2h-12z" />
+    <!-- Top accent ribbon/bookmark -->
+    <path
+        android:fillColor="#E91E63"
+        android:pathData="M70,28c1.66,0 3,1.34 3,3v8l-8,0l0,-8c0,-1.66 1.34,-3 3,-3z" />
+</vector>

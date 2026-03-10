@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EPUB.js Reader</title>
+    <script src="jszip.min.js"></script>
+    <script src="epub.min.js"></script>
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100vw; height: 100vh;
+            overflow: hidden !important;
+            background-color: transparent !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            display: none;
+        }
+        #viewer {
+            position: absolute; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1;
+            background-color: transparent !important;
+        }
+        #viewer iframe {
+            width: 100% !important;
+            height: 100% !important;
+            background-color: transparent !important;
+        }
+        body.is-scrolled, body.is-scrolled html {
+            overflow-y: auto !important;
+            height: auto !important;
+        }
+        ::-webkit-scrollbar { display: none !important; width: 0 !important; }
+
+        .bionic-bold { font-weight: inherit; display: inline !important; }
+        body.bionic-enabled .bionic-bold {
+            font-weight: var(--bionic-weight, 700) !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-overlay"></div>
+    <div id="viewer"></div>
+
+    <script>
+        var book, rendition;
+        var savedSettings = null;
+        var initialJumpDone = false;
+        var bookData = null;
+
+        function base64ToArrayBuffer(base64) {
+            var binary_string = window.atob(base64);
+            var len = binary_string.length;
+            var bytes = new Uint8Array(len);
+            for (var i = 0; i < len; i++) { bytes[i] = binary_string.charCodeAt(i); }
+            return bytes.buffer;
+        }
+
+        (function init() {
+            if (window.AndroidReader && window.AndroidReader.getBookBase64) {
+                try {
+                    if (window.AndroidReader.getSettings) {
+                        var settingsStr = window.AndroidReader.getSettings();
+                        if (settingsStr) savedSettings = JSON.parse(settingsStr);
+                    }
+                    var b64Data = window.AndroidReader.getBookBase64();
+                    if (b64Data) {
+                        bookData = base64ToArrayBuffer(b64Data);
+                        openBook(bookData);
+                    }
+                } catch (e) { console.error("Init Error: " + e.message); }
+            } else {
+                setTimeout(init, 100);
+            }
+        })();
+
+        function openBook(data, cfi) {
+            try {
+                if (rendition) rendition.destroy();
+                document.getElementById('viewer').innerHTML = '';
+
+                book = ePub(data);
+                var isPageMode = savedSettings && savedSettings.readingMode === "PAGE";
+                document.body.classList.toggle("is-scrolled", !isPageMode);
+
+                rendition = book.renderTo("viewer", {
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                    flow: isPageMode ? "paginated" : "scrolled",
+                    manager: isPageMode ? "default" : "continuous",
+                    allowScriptedContent: true
+                });
+
+                rendition.hooks.content.register(function(contents) {
+                    applyStylesToContents(contents);
+                    setupTouchHandling(contents);
+                });
+
+                book.ready.then(function() {
+                    return book.locations.generate(1024);
+                }).then(function() {
+                    var targetCfi = cfi || (window.AndroidReader ? window.AndroidReader.getInitialCfi() : "");
+                    if (savedSettings) applySettings(savedSettings, true);
+                    rendition.resize();
+                    return rendition.display(targetCfi || undefined);
+                }).then(function() {
+                    setTimeout(function() {
+                        initialJumpDone = true;
+                        rendition.resize();
+                        if (!isPageMode) {
+                            window.addEventListener('scroll', function() {
+                                if (initialJumpDone) updateProgress();
+                            }, {passive: true});
+                        }
+                    }, 200);
+                });
+
+                rendition.on("relocated", function(location) {
+                    if (initialJumpDone) updateProgress(location);
+                });
+
+            } catch(e) { console.error("OpenBook Error: " + e.message); }
+        }
+
+        function setupTouchHandling(contents) {
+            var startX, startY;
+            contents.document.addEventListener('touchstart', function(e) {
+                startX = e.changedTouches[0].screenX;
+                startY = e.changedTouches[0].screenY;
+            }, {passive: true});
+
+            contents.document.addEventListener('touchend', function(e) {
+                var endX = e.changedTouches[0].screenX;
+                var endY = e.changedTouches[0].screenY;
+                var diffX = startX - endX;
+                var diffY = startY - endY;
+                var isPageMode = savedSettings && savedSettings.readingMode === "PAGE";
+
+                if (Math.abs(diffX) < 10 && Math.abs(diffY) < 10) {
+                    if (window.AndroidReader) window.AndroidReader.toggleMenu();
+                } else if (isPageMode && Math.abs(diffX) > 40 && Math.abs(diffY) < 100) {
+                    if (diffX > 0) rendition.next();
+                    else rendition.prev();
+                }
+            }, {passive: true});
+        }
+
+        function applyStylesToContents(contents) {
+            const s = savedSettings;
+            if (!s) return;
+            const isPageMode = s.readingMode === "PAGE";
+
+            var rules = {
+                "html": {
+                    "background-color": "transparent !important",
+                    "background-image": "none !important"
+                },
+                "body": {
+                    "background-color": "transparent !important",
+                    "background-image": "none !important",
+                    "color": s.textColor + " !important",
+                    "font-family": s.fontFamily + " !important",
+                    "font-size": s.fontSize + "px !important",
+                    "line-height": s.lineHeight + " !important",
+                    "padding": "0 " + (s.margin || 20) + "px !important",
+                    "overflow": isPageMode ? "hidden !important" : "visible !important",
+                    "transition": "none !important"
+                },
+                "p, div, span, li, h1, h2, h3, h4, h5, h6, a": {
+                    "color": s.textColor + " !important",
+                    "font-family": s.fontFamily + " !important",
+                    "background-color": "transparent !important"
+                },
+                ".bionic-bold": {
+                    "font-weight": "inherit",
+                    "display": "inline !important"
+                },
+                "body.bionic-enabled .bionic-bold": {
+                    "font-weight": (s.focusTextBoldness || 700) + " !important"
+                }
+            };
+            contents.addStylesheetRules(rules);
+
+            if (s.focusText) {
+                contents.addClass('bionic-enabled');
+                contents.document.documentElement.style.setProperty('--bionic-weight', s.focusTextBoldness);
+                applyBionic(contents.document.body, s.focusTextBoldness);
+            } else {
+                contents.removeClass('bionic-enabled');
+            }
+        }
+
+        window.applySettings = function(s, isInitial) {
+            var oldSettings = savedSettings;
+            savedSettings = s;
+
+            if (!isInitial && oldSettings && (oldSettings.readingMode !== s.readingMode)) {
+                var loc = rendition.currentLocation();
+                openBook(bookData, loc ? loc.start.cfi : null);
+                return;
+            }
+
+            var bgOverlay = document.getElementById('bg-overlay');
+            if (s.readerTheme === "IMAGE" && s.backgroundImageUri) {
+                var dataUrl = window.AndroidReader.getBackgroundImageDataUrl(s.backgroundImageUri);
+                if (dataUrl) {
+                    bgOverlay.style.backgroundImage = "url('" + dataUrl + "')";
+                    bgOverlay.style.display = "block";
+                    bgOverlay.style.filter = "blur(" + (s.backgroundImageBlur || 0) + "px)";
+                    bgOverlay.style.opacity = s.backgroundImageOpacity !== undefined ? s.backgroundImageOpacity : 1;
+
+                    document.body.style.backgroundColor = "transparent";
+                    document.documentElement.style.backgroundColor = "transparent";
+                } else {
+                    bgOverlay.style.display = "none";
+                    document.body.style.backgroundColor = s.backgroundColor;
+                    document.documentElement.style.backgroundColor = s.backgroundColor;
+                }
+            } else {
+                bgOverlay.style.display = "none";
+                bgOverlay.style.backgroundImage = 'none';
+
+                document.body.style.backgroundColor = s.backgroundColor;
+                document.documentElement.style.backgroundColor = s.backgroundColor;
+            }
+
+            if (!rendition) return;
+            rendition.getContents().forEach(c => applyStylesToContents(c));
+        };
+
+        function updateProgress(location) {
+            if (!window.AndroidReader || !book || !initialJumpDone) return;
+            var currentLoc = location || rendition.currentLocation();
+            if (!currentLoc || !currentLoc.start) return;
+            var percent = book.locations.length() > 0 ? book.locations.percentageFromCfi(currentLoc.start.cfi) : currentLoc.start.percentage;
+            window.AndroidReader.onLocationChanged(JSON.stringify({
+                start: { cfi: currentLoc.start.cfi, percentage: percent },
+                explicitPercentage: percent
+            }));
+        }
+
+        function applyBionic(root, weight) {
+            if (root.dataset.bionicApplied === "true") {
+                const doc = root.ownerDocument || document;
+                doc.documentElement.style.setProperty('--bionic-weight', weight);
+                return;
+            }
+            root.dataset.bionicApplied = "true";
+
+            const doc = root.ownerDocument || document;
+            doc.documentElement.style.setProperty('--bionic-weight', weight);
+            const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+            let node, nodes = [];
+            const skipped = ['script', 'style', 'code', 'pre', 'img'];
+            while(node = walker.nextNode()) {
+                if (node.parentElement && !skipped.includes(node.parentElement.tagName.toLowerCase())) {
+                    nodes.push(node);
+                }
+            }
+            nodes.forEach(textNode => {
+                const text = textNode.nodeValue;
+                if (!text || text.trim().length < 2) return;
+                const newHtml = text.replace(/[\p{L}\p{N}]+/gu, (word) => {
+                    if (word.length <= 1) return word;
+                    const boldCount = word.length <= 3 ? 1 : Math.floor(word.length * 0.45);
+                    return `<span class="bionic-bold">${word.slice(0, boldCount)}</span>${word.slice(boldCount)}`;
+                });
+                if (newHtml !== text) {
+                    const span = doc.createElement('span');
+                    span.innerHTML = newHtml;
+                    textNode.parentNode.replaceChild(span, textNode);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

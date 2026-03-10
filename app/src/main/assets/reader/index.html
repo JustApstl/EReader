@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EPUB.js Reader</title>
+    <script src="jszip.min.js"></script>
+    <script src="epub.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden !important;
+            background-color: transparent !important;
+            -webkit-tap-highlight-color: transparent;
+            overflow-anchor: none !important;
+        }
+
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            display: none;
+        }
+
+        #viewer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            background-color: transparent !important;
+            overflow-anchor: none !important;
+            perspective: 2200px;
+            transform-style: preserve-3d;
+        }
+
+        #viewer iframe {
+            width: 100% !important;
+            height: 100% !important;
+            background-color: transparent !important;
+            transition: transform 0.48s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.28s ease, filter 0.48s ease, box-shadow 0.48s ease;
+            transform-origin: left center;
+            backface-visibility: hidden;
+            will-change: transform, opacity, filter;
+            border-radius: 14px;
+            box-shadow: 0 18px 44px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            outline: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        body.is-scrolled #viewer iframe {
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        #turn-shadow {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.44s ease;
+        }
+
+        body.turning-next #turn-shadow {
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.03) 35%, transparent 62%);
+            opacity: 0.2;
+        }
+
+        body.turning-prev #turn-shadow {
+            background: linear-gradient(to left, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.03) 35%, transparent 62%);
+            opacity: 0.2;
+        }
+
+        .page-turning-next {
+            transform-origin: left center !important;
+            transform: perspective(2200px) rotateY(-34deg) translateX(-12px) scale(0.985);
+            filter: brightness(0.86);
+            box-shadow: -22px 18px 38px rgba(0, 0, 0, 0.32), inset -8px 0 20px rgba(0, 0, 0, 0.25);
+            opacity: 0.9;
+        }
+
+        .page-turning-prev {
+            transform: perspective(2200px) rotateY(34deg) translateX(12px) scale(0.985);
+            transform-origin: right center !important;
+            filter: brightness(0.86);
+            box-shadow: 22px 18px 38px rgba(0, 0, 0, 0.32), inset 8px 0 20px rgba(0, 0, 0, 0.25);
+            opacity: 0.9;
+        }
+
+        #viewer iframe.transition-tilt-next.page-turning-next {
+            transform: perspective(2200px) rotateY(-18deg) rotateZ(-3.6deg) translateX(-10px) scale(0.99);
+            filter: brightness(0.9);
+        }
+
+        #viewer iframe.transition-tilt-prev.page-turning-prev {
+            transform: perspective(2200px) rotateY(18deg) rotateZ(3.6deg) translateX(10px) scale(0.99);
+            filter: brightness(0.9);
+        }
+
+        #viewer iframe.transition-card-next.page-turning-next {
+            transform: perspective(2200px) rotateY(-14deg) rotateX(6deg) translateY(2px) scale(0.95);
+            filter: brightness(0.82);
+            box-shadow: -26px 22px 44px rgba(0, 0, 0, 0.36), inset -10px 0 22px rgba(0, 0, 0, 0.26);
+        }
+
+        #viewer iframe.transition-card-prev.page-turning-prev {
+            transform: perspective(2200px) rotateY(14deg) rotateX(6deg) translateY(2px) scale(0.95);
+            filter: brightness(0.82);
+            box-shadow: 26px 22px 44px rgba(0, 0, 0, 0.36), inset 10px 0 22px rgba(0, 0, 0, 0.26);
+        }
+
+        #viewer iframe.transition-flip-next.page-turning-next {
+            transform: perspective(2200px) rotateY(-72deg) translateX(-22px) scale(0.98);
+            opacity: 0.82;
+        }
+
+        #viewer iframe.transition-flip-prev.page-turning-prev {
+            transform: perspective(2200px) rotateY(72deg) translateX(22px) scale(0.98);
+            opacity: 0.82;
+        }
+
+        #viewer iframe.transition-cube-next.page-turning-next {
+            transform: perspective(2200px) rotateY(-52deg) translateX(-30px) scale(0.99);
+            opacity: 0.86;
+        }
+
+        #viewer iframe.transition-cube-prev.page-turning-prev {
+            transform: perspective(2200px) rotateY(52deg) translateX(30px) scale(0.99);
+            opacity: 0.86;
+        }
+
+        #viewer iframe.transition-roll-next.page-turning-next {
+            transform: perspective(2200px) rotateY(-20deg) rotateZ(-8deg) translateX(-16px) scale(0.98);
+            opacity: 0.9;
+        }
+
+        #viewer iframe.transition-roll-prev.page-turning-prev {
+            transform: perspective(2200px) rotateY(20deg) rotateZ(8deg) translateX(16px) scale(0.98);
+            opacity: 0.9;
+        }
+
+        body.is-scrolled,
+        body.is-scrolled html {
+            overflow-y: auto !important;
+            height: auto !important;
+            overflow-anchor: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+        }
+
+        .bionic-bold {
+            font-weight: inherit;
+            display: inline !important;
+        }
+
+        .bionic-enabled .bionic-bold,
+        body.bionic-enabled .bionic-bold,
+        html.bionic-enabled .bionic-bold {
+            font-weight: var(--bionic-weight, 700) !important;
+            color: var(--bionic-color, inherit) !important;
+        }
+
+        .epubjs-hl {
+            fill-opacity: 0.45;
+            pointer-events: none !important;
+        }
+
+        .note-indicator {
+            pointer-events: visibleStroke !important;
+            cursor: pointer;
+        }
+
+        body.filter-invert img {
+            filter: invert(100%) !important;
+        }
+
+        body.filter-darken img {
+            filter: brightness(50%) !important;
+        }
+
+        .tts-highlight {
+            background-color: rgba(33, 150, 243, 0.3) !important;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-overlay"></div>
+    <div id="viewer"></div>
+    <div id="turn-shadow"></div>
+
+    <script>
+        var book = null;
+        var rendition = null;
+        var savedSettings = null;
+        var initialJumpDone = false;
+        var bookData = null;
+        var renderedHighlightCfis = [];
+        var renderedNoteCfis = [];
+        var customFontCacheUri = "";
+        var customFontCacheDataUrl = "";
+        var menuState = {
+            selectionOpen: false,
+            highlightOpen: false,
+            noteOpen: false
+        };
+        var activeSelection = null;
+        var activeHighlight = null;
+        var activeNote = null;
+        var anchorUpdateScheduled = false;
+
+        function getBridge() {
+            return window.AndroidReader || (window.parent && window.parent.AndroidReader);
+        }
+
+        function log(message) {
+            var bridge = getBridge();
+            if (bridge && bridge.log) {
+                bridge.log(message);
+            }
+            console.log(message);
+        }
+
+        function base64ToArrayBuffer(base64) {
+            var binaryString = window.atob(base64);
+            var len = binaryString.length;
+            var bytes = new Uint8Array(len);
+            for (var i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function getCurrentFrame() {
+            return document.querySelector("#viewer iframe");
+        }
+
+        function frameElementForRange(range) {
+            if (!range || !range.startContainer || !range.startContainer.ownerDocument) {
+                return getCurrentFrame();
+            }
+            var rangeWindow = range.startContainer.ownerDocument.defaultView;
+            return (rangeWindow && rangeWindow.frameElement) ? rangeWindow.frameElement : getCurrentFrame();
+        }
+
+        function frameElementForNode(node) {
+            if (!node || !node.ownerDocument) {
+                return getCurrentFrame();
+            }
+            var nodeWindow = node.ownerDocument.defaultView;
+            return (nodeWindow && nodeWindow.frameElement) ? nodeWindow.frameElement : getCurrentFrame();
+        }
+
+        function anchorFromRect(rect, frameElement) {
+            if (!rect) {
+                return null;
+            }
+
+            var x = rect.left + (rect.width / 2);
+            var y = rect.bottom;
+            var frame = frameElement || getCurrentFrame();
+            if (frame && frame.getBoundingClientRect) {
+                var frameRect = frame.getBoundingClientRect();
+                x += frameRect.left;
+                y += frameRect.top;
+            }
+            if (!isFinite(x) || !isFinite(y)) {
+                return null;
+            }
+            return { x: x, y: y };
+        }
+
+        function anchorFromClientPoint(clientX, clientY, frameElement) {
+            var x = clientX;
+            var y = clientY;
+            var frame = frameElement || getCurrentFrame();
+            if (frame && frame.getBoundingClientRect) {
+                var frameRect = frame.getBoundingClientRect();
+                x += frameRect.left;
+                y += frameRect.top;
+            }
+            if (!isFinite(x) || !isFinite(y)) {
+                return null;
+            }
+            return { x: x, y: y };
+        }
+
+        function anchorForCfi(cfi) {
+            if (!rendition || !cfi || !rendition.getRange) {
+                return null;
+            }
+            try {
+                var range = rendition.getRange(cfi);
+                if (!range) {
+                    return null;
+                }
+                return anchorFromRect(range.getBoundingClientRect(), frameElementForRange(range));
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function updateActiveMenuPositions() {
+            var bridge = getBridge();
+            if (!bridge) {
+                return;
+            }
+
+            if (menuState.selectionOpen && activeSelection && bridge.onTextSelected) {
+                var selectionAnchor = anchorForCfi(activeSelection.cfiRange);
+                if (selectionAnchor) {
+                    bridge.onTextSelected(
+                        activeSelection.chapterAnchor,
+                        activeSelection.cfiRange,
+                        activeSelection.text,
+                        selectionAnchor.x,
+                        selectionAnchor.y
+                    );
+                }
+            }
+
+            if (menuState.highlightOpen && activeHighlight && bridge.onHighlightClicked) {
+                var highlightAnchor = anchorForCfi(activeHighlight.cfiRange);
+                if (highlightAnchor) {
+                    bridge.onHighlightClicked(activeHighlight.id, highlightAnchor.x, highlightAnchor.y);
+                }
+            }
+
+            if (menuState.noteOpen && activeNote && bridge.onMarginNoteClicked) {
+                var noteAnchor = anchorForCfi(activeNote.cfi);
+                if (noteAnchor) {
+                    bridge.onMarginNoteClicked(activeNote.id, noteAnchor.x, noteAnchor.y);
+                }
+            }
+        }
+
+        function scheduleActiveMenuPositionUpdate() {
+            if (anchorUpdateScheduled) {
+                return;
+            }
+            anchorUpdateScheduled = true;
+            window.requestAnimationFrame(function() {
+                anchorUpdateScheduled = false;
+                updateActiveMenuPositions();
+            });
+        }
+
+        function setupMenuAnchorTracking(contents) {
+            if (!contents || !contents.window) {
+                return;
+            }
+            var contentWindow = contents.window;
+            if (contentWindow.__menuAnchorTrackingInstalled) {
+                return;
+            }
+            contentWindow.__menuAnchorTrackingInstalled = true;
+
+            contentWindow.addEventListener("scroll", scheduleActiveMenuPositionUpdate, { passive: true });
+            contentWindow.addEventListener("resize", scheduleActiveMenuPositionUpdate);
+        }
+
+        window.setNativeMenuState = function(selectionOpen, highlightOpen, noteOpen) {
+            menuState.selectionOpen = !!selectionOpen;
+            menuState.highlightOpen = !!highlightOpen;
+            menuState.noteOpen = !!noteOpen;
+
+            if (!menuState.selectionOpen) {
+                activeSelection = null;
+            }
+            if (!menuState.highlightOpen) {
+                activeHighlight = null;
+            }
+            if (!menuState.noteOpen) {
+                activeNote = null;
+            }
+
+            updateActiveMenuPositions();
+        };
+
+        (function init() {
+            var bridge = getBridge();
+            if (!bridge || !bridge.getBookBase64) {
+                setTimeout(init, 100);
+                return;
+            }
+
+            try {
+                if (bridge.getSettings) {
+                    var settingsStr = bridge.getSettings();
+                    if (settingsStr) {
+                        savedSettings = JSON.parse(settingsStr);
+                    }
+                }
+
+                var b64Data = bridge.getBookBase64();
+                if (b64Data) {
+                    bookData = base64ToArrayBuffer(b64Data);
+                    openBook(bookData);
+                }
+            } catch (e) {
+                log("Init Error: " + e.message);
+            }
+        })();
+
+        function openBook(data, cfi) {
+            try {
+                initialJumpDone = false;
+                clearRenderedHighlights();
+                clearRenderedNotes();
+                activeSelection = null;
+                activeHighlight = null;
+                activeNote = null;
+
+                if (rendition) {
+                    try {
+                        rendition.destroy();
+                    } catch (e) {
+                        log("Rendition destroy warning: " + e.message);
+                    }
+                }
+
+                document.getElementById("viewer").innerHTML = "";
+
+                book = ePub(data);
+                var isPageMode = savedSettings && savedSettings.readingMode === "PAGE";
+                document.body.classList.toggle("is-scrolled", !isPageMode);
+
+                rendition = book.renderTo("viewer", {
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                    flow: isPageMode ? "paginated" : "scrolled",
+                    manager: isPageMode ? "default" : "continuous",
+                    allowScriptedContent: true
+                });
+
+                rendition.hooks.content.register(function(contents) {
+                    try {
+                        enforceSelectionBehavior(contents);
+                        setupTouchHandling(contents);
+                        setupMenuAnchorTracking(contents);
+                        setupExternalLinkHandling(contents);
+                        applyStylesToContents(contents);
+                        if (contents.window) {
+                            contents.window.AndroidReader = getBridge();
+                        }
+                    } catch (e) {
+                        log("Content hook error: " + e.message);
+                    }
+                });
+
+                rendition.on("selected", function(cfiRange, contents) {
+                    triggerSelectionMenu(cfiRange, contents);
+                });
+
+                rendition.on("relocated", function(location) {
+                    if (initialJumpDone) {
+                        updateProgress(location);
+                        updatePagination();
+                    }
+                    scheduleActiveMenuPositionUpdate();
+                });
+
+                book.loaded.navigation.then(function(nav) {
+                    var chapters = (nav.toc || []).map(function(t) {
+                        return {
+                            label: (t.label || "").trim(),
+                            href: t.href
+                        };
+                    });
+                    var bridge = getBridge();
+                    if (bridge && bridge.onChaptersLoaded) {
+                        bridge.onChaptersLoaded(JSON.stringify(chapters));
+                    }
+                }).catch(function(e) {
+                    log("Navigation parse warning: " + e.message);
+                });
+
+                book.ready.then(function() {
+                    return book.locations.generate(1024);
+                }).then(function() {
+                    var bridge = getBridge();
+                    var targetCfi = cfi || (bridge && bridge.getInitialCfi ? bridge.getInitialCfi() : "");
+                    if (savedSettings) {
+                        applySettings(savedSettings, true);
+                    }
+                    rendition.resize();
+                    return rendition.display(targetCfi || undefined);
+                }).then(function() {
+                    setTimeout(function() {
+                        initialJumpDone = true;
+                        rendition.resize();
+                        requestHighlightSync();
+                        updateProgress();
+                        updatePagination();
+                    }, 220);
+                }).catch(function(e) {
+                    log("Book ready/display error: " + e.message);
+                });
+            } catch (e) {
+                log("OpenBook Error: " + e.message);
+            }
+        }
+
+        function requestHighlightSync() {
+            var bridge = getBridge();
+            if (bridge && bridge.requestHighlights) {
+                bridge.requestHighlights();
+            }
+            if (bridge && bridge.requestMarginNotes) {
+                bridge.requestMarginNotes();
+            }
+        }
+
+        function enforceSelectionBehavior(contents) {
+            var doc = contents.document;
+            if (!doc) {
+                return;
+            }
+
+            doc.documentElement.style.setProperty("-webkit-user-select", "text", "important");
+            doc.body.style.setProperty("-webkit-user-select", "text", "important");
+            doc.documentElement.style.setProperty("overflow-anchor", "none", "important");
+            doc.body.style.setProperty("overflow-anchor", "none", "important");
+        }
+
+        function setupExternalLinkHandling(contents) {
+            var doc = contents.document;
+            if (!doc) {
+                return;
+            }
+
+            doc.addEventListener("click", function(event) {
+                var node = event.target;
+                while (node && node.tagName !== "A") {
+                    node = node.parentElement;
+                }
+                if (!node) {
+                    return;
+                }
+
+                var href = node.getAttribute("href") || "";
+                if (href.startsWith("http://") || href.startsWith("https://")) {
+                    event.preventDefault();
+                    var bridge = getBridge();
+                    if (bridge && bridge.openBrowser) {
+                        bridge.openBrowser(href);
+                    }
+                }
+            }, true);
+        }
+
+        function setupTouchHandling(contents) {
+            var startX = 0;
+            var startY = 0;
+            var selectionTimeout = null;
+
+            contents.document.addEventListener("touchstart", function(e) {
+                startX = e.changedTouches[0].screenX;
+                startY = e.changedTouches[0].screenY;
+                if (selectionTimeout) {
+                    clearTimeout(selectionTimeout);
+                }
+            }, { passive: true });
+
+            contents.document.addEventListener("touchend", function(e) {
+                var endX = e.changedTouches[0].screenX;
+                var endY = e.changedTouches[0].screenY;
+                var diffX = startX - endX;
+                var diffY = startY - endY;
+                var isPageMode = savedSettings && savedSettings.readingMode === "PAGE";
+
+                if (selectionTimeout) {
+                    clearTimeout(selectionTimeout);
+                }
+
+                selectionTimeout = setTimeout(function() {
+                    var selection = contents.window.getSelection();
+                    if (selection && selection.toString().trim().length > 0) {
+                        try {
+                            var range = selection.getRangeAt(0);
+                            var cfiRange = contents.cfiFromRange(range);
+                            if (cfiRange) {
+                                triggerSelectionMenu(cfiRange, contents);
+                                return;
+                            }
+                        } catch (err) {
+                            log("Selection conversion warning: " + err.message);
+                        }
+                    }
+
+                    if (Math.abs(diffX) < 10 && Math.abs(diffY) < 10) {
+                        var bridge = getBridge();
+                        if (bridge && bridge.toggleMenu) {
+                            bridge.toggleMenu();
+                        }
+                    }
+                }, 100);
+
+                if (isPageMode && Math.abs(diffX) > 40 && Math.abs(diffY) < 100) {
+                    if (diffX > 0) {
+                        window.nextPage();
+                    } else {
+                        window.prevPage();
+                    }
+                }
+            }, { passive: true });
+        }
+
+        function triggerSelectionMenu(cfiRange, contents) {
+            if (!cfiRange || !contents) {
+                return;
+            }
+
+            var bridge = getBridge();
+            if (!bridge || !bridge.onTextSelected) {
+                return;
+            }
+
+            var selection = contents.window && contents.window.getSelection ? contents.window.getSelection() : null;
+            var selectedText = selection ? selection.toString().trim() : "";
+            if (!selectedText) {
+                return;
+            }
+
+            var x = 0;
+            var y = 0;
+            try {
+                var range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+                if (range) {
+                    var selectionAnchor = anchorFromRect(
+                        range.getBoundingClientRect(),
+                        frameElementForRange(range)
+                    );
+                    if (selectionAnchor) {
+                        x = selectionAnchor.x;
+                        y = selectionAnchor.y;
+                    }
+                }
+            } catch (e) {
+                log("Selection bounds warning: " + e.message);
+            }
+
+            var currentLocation = rendition && rendition.currentLocation ? rendition.currentLocation() : null;
+            var chapterAnchor = currentLocation && currentLocation.start && currentLocation.start.cfi
+                ? currentLocation.start.cfi
+                : cfiRange;
+
+            activeSelection = {
+                chapterAnchor: chapterAnchor,
+                cfiRange: cfiRange,
+                text: selectedText
+            };
+            activeHighlight = null;
+            activeNote = null;
+            bridge.onTextSelected(chapterAnchor, cfiRange, selectedText, x, y);
+        }
+
+        function clearRenderedHighlights() {
+            if (!rendition || !rendition.annotations) {
+                renderedHighlightCfis = [];
+                return;
+            }
+
+            for (var i = 0; i < renderedHighlightCfis.length; i++) {
+                try {
+                    rendition.annotations.remove(renderedHighlightCfis[i], "highlight");
+                } catch (e) {
+                    // Ignore stale annotations
+                }
+            }
+            renderedHighlightCfis = [];
+        }
+
+        function clearRenderedNotes() {
+            if (!rendition || !rendition.annotations) {
+                renderedNoteCfis = [];
+                return;
+            }
+
+            for (var i = 0; i < renderedNoteCfis.length; i++) {
+                try {
+                    rendition.annotations.remove(renderedNoteCfis[i], "underline");
+                } catch (e) {
+                    // Ignore stale annotation references
+                }
+            }
+            renderedNoteCfis = [];
+        }
+
+        window.renderHighlights = function(highlightsJson) {
+            if (!rendition || !rendition.annotations) {
+                return;
+            }
+
+            clearRenderedHighlights();
+
+            var highlights = [];
+            try {
+                highlights = JSON.parse(highlightsJson || "[]");
+            } catch (e) {
+                log("RenderHighlights parse error: " + e.message);
+                return;
+            }
+
+            highlights.forEach(function(hl) {
+                if (!hl || !hl.selectionJson) {
+                    return;
+                }
+
+                var cfiRange = hl.selectionJson;
+                var color = hl.color || "#FFFF00";
+                var highlightId = Number(hl.id || 0);
+
+                try {
+                    rendition.annotations.add(
+                        "highlight",
+                        cfiRange,
+                        { id: highlightId },
+                        function(event) {
+                            var bridge = getBridge();
+                            if (!bridge || !bridge.onHighlightClicked) {
+                                return;
+                            }
+
+                            var x = 0;
+                            var y = 0;
+                            try {
+                                var node = event && (event.target || event.currentTarget || event.srcElement);
+                                var frameElement = frameElementForNode(node);
+                                var rect = node && node.getBoundingClientRect ? node.getBoundingClientRect() : null;
+                                if (rect) {
+                                    var highlightAnchor = anchorFromRect(rect, frameElement);
+                                    if (highlightAnchor) {
+                                        x = highlightAnchor.x;
+                                        y = highlightAnchor.y;
+                                    }
+                                } else if (event && typeof event.clientX === "number") {
+                                    var fallbackAnchor = anchorFromClientPoint(event.clientX, event.clientY, frameElement);
+                                    if (fallbackAnchor) {
+                                        x = fallbackAnchor.x;
+                                        y = fallbackAnchor.y;
+                                    }
+                                }
+                            } catch (err) {
+                                log("Highlight click bounds warning: " + err.message);
+                            }
+
+                            activeSelection = null;
+                            activeHighlight = { id: highlightId, cfiRange: cfiRange };
+                            activeNote = null;
+                            bridge.onHighlightClicked(highlightId, x, y);
+                        },
+                        "epubjs-hl",
+                        {
+                            fill: color,
+                            "fill-opacity": "0.45",
+                            "mix-blend-mode": "multiply"
+                        }
+                    );
+                    renderedHighlightCfis.push(cfiRange);
+                } catch (e) {
+                    log("Highlight add error: " + e.message);
+                }
+            });
+        };
+
+        window.renderNoteIndicators = function(notesJson) {
+            if (!rendition || !rendition.annotations) {
+                return;
+            }
+
+            clearRenderedNotes();
+
+            var notes = [];
+            try {
+                notes = JSON.parse(notesJson || "[]");
+            } catch (e) {
+                log("RenderNoteIndicators parse error: " + e.message);
+                return;
+            }
+
+            notes.forEach(function(note) {
+                if (!note || !note.cfi) {
+                    return;
+                }
+
+                var indicatorColor = note.color || "#FF9800";
+                var noteId = Number(note.id || 0);
+                if (String(indicatorColor).toUpperCase() === "#FFFF00") {
+                    indicatorColor = "#FF9800";
+                }
+                try {
+                    rendition.annotations.add(
+                        "underline",
+                        note.cfi,
+                        { id: noteId },
+                        function(event) {
+                            var bridge = getBridge();
+                            if (!bridge || !bridge.onMarginNoteClicked) {
+                                return;
+                            }
+
+                            var x = 0;
+                            var y = 0;
+                            try {
+                                var node = event && (event.target || event.currentTarget || event.srcElement);
+                                var frameElement = frameElementForNode(node);
+                                var rect = node && node.getBoundingClientRect ? node.getBoundingClientRect() : null;
+                                if (rect) {
+                                    var noteAnchor = anchorFromRect(rect, frameElement);
+                                    if (noteAnchor) {
+                                        x = noteAnchor.x;
+                                        y = noteAnchor.y;
+                                    }
+                                } else if (event && typeof event.clientX === "number") {
+                                    var fallbackAnchor = anchorFromClientPoint(event.clientX, event.clientY, frameElement);
+                                    if (fallbackAnchor) {
+                                        x = fallbackAnchor.x;
+                                        y = fallbackAnchor.y;
+                                    }
+                                }
+                            } catch (err) {
+                                log("Note indicator bounds warning: " + err.message);
+                            }
+
+                            activeSelection = null;
+                            activeHighlight = null;
+                            activeNote = { id: noteId, cfi: note.cfi };
+                            bridge.onMarginNoteClicked(noteId, x, y);
+                        },
+                        "note-indicator",
+                        {
+                            stroke: indicatorColor,
+                            "stroke-width": "2",
+                            opacity: "0.95"
+                        }
+                    );
+                    renderedNoteCfis.push(note.cfi);
+                } catch (e) {
+                    log("Note indicator add error: " + e.message);
+                }
+            });
+        };
+
+        window.getCurrentText = function() {
+            if (!rendition) {
+                return;
+            }
+
+            var combinedText = "";
+            try {
+                var parts = rendition.getContents().map(function(content) {
+                    if (!content || !content.document || !content.document.body) {
+                        return "";
+                    }
+                    return (content.document.body.innerText || "").trim();
+                }).filter(function(text) {
+                    return text.length > 0;
+                });
+
+                combinedText = parts.join("\n\n").replace(/\s+/g, " ").trim();
+            } catch (e) {
+                log("getCurrentText error: " + e.message);
+            }
+
+            if (!combinedText) {
+                try {
+                    combinedText = (document.getElementById("viewer").innerText || "")
+                        .replace(/\s+/g, " ")
+                        .trim();
+                } catch (e) {
+                    log("getCurrentText fallback error: " + e.message);
+                }
+            }
+
+            var bridge = getBridge();
+            if (bridge && bridge.onTextExtracted) {
+                bridge.onTextExtracted(combinedText);
+            }
+        };
+
+        window.jumpTo = function(anchor) {
+            if (!rendition || !anchor) {
+                return;
+            }
+            try {
+                rendition.display(anchor);
+            } catch (e) {
+                log("JumpTo Error: " + e.message);
+            }
+        };
+
+        window.jumpToPercentage = function(percent) {
+            if (!book || !rendition) {
+                return;
+            }
+
+            try {
+                var p = parseFloat(percent);
+                if (isNaN(p)) {
+                    return;
+                }
+                p = Math.max(0, Math.min(1, p));
+
+                if (!book.locations || book.locations.length() === 0) {
+                    book.locations.generate(1024).then(function() {
+                        var generatedCfi = book.locations.cfiFromPercentage(p);
+                        rendition.display(generatedCfi);
+                    });
+                } else {
+                    var cfi = book.locations.cfiFromPercentage(p);
+                    rendition.display(cfi);
+                }
+            } catch (e) {
+                log("JumpToPercentage Error: " + e.message);
+            }
+        };
+
+        function normalizePageTransitionStyle(rawStyle) {
+            var style = String(rawStyle || "DEFAULT").toUpperCase();
+            var supported = {
+                DEFAULT: true,
+                TILT: true,
+                CARD: true,
+                FLIP: true,
+                CUBE: true,
+                ROLL: true
+            };
+            return supported[style] ? style : "DEFAULT";
+        }
+
+        function getTransitionTiming(style) {
+            switch (style) {
+                case "FLIP":
+                    return { duration: 520, swap: 250 };
+                case "CUBE":
+                    return { duration: 500, swap: 240 };
+                case "ROLL":
+                    return { duration: 480, swap: 225 };
+                case "CARD":
+                    return { duration: 500, swap: 235 };
+                case "TILT":
+                    return { duration: 450, swap: 210 };
+                default:
+                    return { duration: 460, swap: 220 };
+            }
+        }
+
+        function animatePageTurn(direction, action) {
+            if (!savedSettings || !savedSettings.pageTurn3d || savedSettings.readingMode !== "PAGE") {
+                action();
+                return;
+            }
+
+            var frame = getCurrentFrame();
+            if (!frame) {
+                action();
+                return;
+            }
+
+            var transitionStyle = normalizePageTransitionStyle(savedSettings.pageTransitionStyle);
+            var timing = getTransitionTiming(transitionStyle);
+            var bodyClass = direction === "next" ? "turning-next" : "turning-prev";
+            var frameClass = direction === "next" ? "page-turning-next" : "page-turning-prev";
+            var transitionClass = "transition-" + transitionStyle.toLowerCase() + "-" + direction;
+            document.body.classList.add(bodyClass);
+            frame.classList.add(frameClass, transitionClass);
+
+            setTimeout(function() {
+                try {
+                    action();
+                } catch (e) {
+                    log("Page turn action error: " + e.message);
+                }
+            }, timing.swap);
+
+            setTimeout(function() {
+                document.body.classList.remove(bodyClass);
+                frame.classList.remove(frameClass, transitionClass);
+            }, timing.duration);
+        }
+
+        window.prevPage = function() {
+            if (!rendition) {
+                return;
+            }
+            animatePageTurn("prev", function() {
+                rendition.prev();
+            });
+        };
+
+        window.nextPage = function() {
+            if (!rendition) {
+                return;
+            }
+            animatePageTurn("next", function() {
+                rendition.next();
+            });
+        };
+
+        function applyBionic(root, weight, colorHex) {
+            if (!root || !root.ownerDocument) {
+                return;
+            }
+
+            var doc = root.ownerDocument;
+            doc.documentElement.style.setProperty("--bionic-weight", String(weight || 700));
+            doc.documentElement.style.setProperty("--bionic-color", colorHex || "inherit");
+
+            if (root.dataset.bionicApplied === "true") {
+                return;
+            }
+            root.dataset.bionicApplied = "true";
+
+            var walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+            var node;
+            var nodes = [];
+            var skippedTags = {
+                SCRIPT: true,
+                STYLE: true,
+                CODE: true,
+                PRE: true,
+                IMG: true
+            };
+
+            while ((node = walker.nextNode())) {
+                var parent = node.parentElement;
+                if (!parent || skippedTags[parent.tagName]) {
+                    continue;
+                }
+                nodes.push(node);
+            }
+
+            nodes.forEach(function(textNode) {
+                var text = textNode.nodeValue;
+                if (!text || text.trim().length < 2) {
+                    return;
+                }
+
+                var newHtml = text.replace(/[A-Za-z0-9]+/g, function(word) {
+                    if (word.length <= 1) {
+                        return word;
+                    }
+                    var boldCount = word.length <= 3 ? 1 : Math.floor(word.length * 0.45);
+                    return "<span class=\"bionic-bold\">" + word.slice(0, boldCount) + "</span>" + word.slice(boldCount);
+                });
+
+                if (newHtml === text) {
+                    return;
+                }
+
+                var span = doc.createElement("span");
+                span.innerHTML = newHtml;
+                textNode.parentNode.replaceChild(span, textNode);
+            });
+        }
+
+        function toShadowColor(colorHex) {
+            if (!colorHex || typeof colorHex !== "string") {
+                return "rgba(0,0,0,0.58)";
+            }
+            var normalized = colorHex.trim();
+            if (!normalized.startsWith("#")) {
+                return normalized;
+            }
+            var hex = normalized.slice(1);
+            if (hex.length === 3) {
+                hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+            }
+            if (hex.length !== 6) {
+                return "rgba(0,0,0,0.58)";
+            }
+            var r = parseInt(hex.slice(0, 2), 16);
+            var g = parseInt(hex.slice(2, 4), 16);
+            var b = parseInt(hex.slice(4, 6), 16);
+            if (!isFinite(r) || !isFinite(g) || !isFinite(b)) {
+                return "rgba(0,0,0,0.58)";
+            }
+            return "rgba(" + r + "," + g + "," + b + ",0.56)";
+        }
+
+        function loadCustomFontDataUrl(uri) {
+            if (!uri) {
+                return "";
+            }
+            if (customFontCacheUri === uri && customFontCacheDataUrl) {
+                return customFontCacheDataUrl;
+            }
+
+            var bridge = getBridge();
+            if (!bridge || !bridge.getFontDataUrl) {
+                return "";
+            }
+
+            try {
+                customFontCacheDataUrl = bridge.getFontDataUrl(uri) || "";
+                customFontCacheUri = uri;
+                return customFontCacheDataUrl;
+            } catch (e) {
+                log("Custom font load error: " + e.message);
+                return "";
+            }
+        }
+
+        function resolveFontFamily(contents, settings) {
+            var baseFamily = settings && settings.fontFamily ? settings.fontFamily : "serif";
+            if (baseFamily !== "custom") {
+                return baseFamily;
+            }
+
+            var customFontUri = settings && settings.customFontUri ? settings.customFontUri : "";
+            var dataUrl = loadCustomFontDataUrl(customFontUri);
+            if (!dataUrl || !contents || !contents.document) {
+                return "serif";
+            }
+
+            var doc = contents.document;
+            var styleId = "reader-custom-font-face";
+            if (!doc.getElementById(styleId)) {
+                var styleTag = doc.createElement("style");
+                styleTag.id = styleId;
+                styleTag.type = "text/css";
+                styleTag.textContent =
+                    "@font-face { font-family: 'ReaderCustomFont'; src: url('" + dataUrl + "'); font-display: swap; }\n" +
+                    ".reader-custom-font-enabled { font-family: 'ReaderCustomFont', serif !important; }";
+                (doc.head || doc.documentElement).appendChild(styleTag);
+            }
+            if (doc.body) {
+                doc.body.classList.add("reader-custom-font-enabled");
+            }
+            return "'ReaderCustomFont', serif";
+        }
+
+        function applyStylesToContents(contents) {
+            var s = savedSettings;
+            if (!s || !contents) {
+                return;
+            }
+
+            var usePublisherStyle = !!s.usePublisherStyle;
+            var textColor = s.textColor || "#1A1A1A";
+            var shadowStyle = s.textShadow ? ("0 1.4px 3.2px " + toShadowColor(s.textShadowColor)) : "none";
+            var linkDecoration = s.underlineLinks ? "underline" : "none";
+            var bionicWeight = (s.focusTextBoldness || 700);
+            var bionicColor = (s.focusTextColor && String(s.focusTextColor).length > 0) ? s.focusTextColor : "inherit";
+            var resolvedFontFamily = resolveFontFamily(contents, s);
+
+            var imageFilterStyle = "none";
+            if (s.imageFilter === "INVERT") {
+                imageFilterStyle = "invert(100%)";
+            } else if (s.imageFilter === "DARKEN") {
+                imageFilterStyle = "brightness(50%)";
+            }
+
+            var rules = {
+                "body": {
+                    "color": textColor + " !important",
+                    "background-color": "transparent !important",
+                    "text-shadow": shadowStyle + " !important",
+                    "font-kerning": "normal !important",
+                    "text-rendering": "optimizeLegibility !important",
+                    "-webkit-font-smoothing": "antialiased !important"
+                },
+                "p, div, span, li, h1, h2, h3, h4, h5, h6": {
+                    "color": textColor + " !important",
+                    "text-shadow": shadowStyle + " !important"
+                },
+                "body *": {
+                    "text-shadow": shadowStyle + " !important"
+                },
+                "p": {
+                    "margin": "0 0 0.9em 0 !important"
+                },
+                "a": {
+                    "color": textColor + " !important",
+                    "text-decoration": linkDecoration + " !important"
+                },
+                "img, svg": {
+                    "filter": imageFilterStyle + " !important"
+                },
+                ".bionic-enabled .bionic-bold": {
+                    "font-weight": String(bionicWeight) + " !important",
+                    "color": bionicColor + " !important"
+                },
+                "body.bionic-enabled .bionic-bold": {
+                    "font-weight": String(bionicWeight) + " !important",
+                    "color": bionicColor + " !important"
+                },
+                "html.bionic-enabled .bionic-bold": {
+                    "font-weight": String(bionicWeight) + " !important",
+                    "color": bionicColor + " !important"
+                }
+            };
+
+            if (!usePublisherStyle) {
+                rules.body["font-family"] = resolvedFontFamily + " !important";
+                rules.body["font-size"] = (s.fontSize || 15) + "px !important";
+                rules.body["line-height"] = (s.lineHeight || 1.55) + " !important";
+                rules.body["padding"] = "0 " + (s.margin || 20) + "px !important";
+                rules.body["letter-spacing"] = "0.01em !important";
+                rules.body["word-spacing"] = "0.02em !important";
+                rules.body["hyphens"] = "auto !important";
+                rules.p["text-align"] = "justify !important";
+            }
+
+            contents.addStylesheetRules(rules);
+
+            if (s.focusText) {
+                contents.addClass("bionic-enabled");
+                if (contents.document && contents.document.body) {
+                    contents.document.body.classList.add("bionic-enabled");
+                    contents.document.documentElement.classList.add("bionic-enabled");
+                }
+                applyBionic(contents.document.body, s.focusTextBoldness || 700, s.focusTextColor || "inherit");
+            } else {
+                contents.removeClass("bionic-enabled");
+                if (contents.document && contents.document.body) {
+                    contents.document.body.classList.remove("bionic-enabled");
+                    contents.document.documentElement.classList.remove("bionic-enabled");
+                }
+            }
+        }
+
+        window.applySettings = function(settings, isInitial) {
+            var oldSettings = savedSettings;
+            savedSettings = settings || {};
+
+            document.body.classList.remove("filter-invert", "filter-darken");
+            if (savedSettings.imageFilter === "INVERT") {
+                document.body.classList.add("filter-invert");
+            } else if (savedSettings.imageFilter === "DARKEN") {
+                document.body.classList.add("filter-darken");
+            }
+
+            if (!isInitial && oldSettings && oldSettings.readingMode !== savedSettings.readingMode) {
+                var current = rendition && rendition.currentLocation ? rendition.currentLocation() : null;
+                var cfi = current && current.start ? current.start.cfi : null;
+                openBook(bookData, cfi);
+                return;
+            }
+
+            var bgOverlay = document.getElementById("bg-overlay");
+            if (savedSettings.readerTheme === "IMAGE" && savedSettings.backgroundImageUri) {
+                var bridge = getBridge();
+                var dataUrl = bridge && bridge.getBackgroundImageDataUrl
+                    ? bridge.getBackgroundImageDataUrl(savedSettings.backgroundImageUri)
+                    : "";
+
+                if (dataUrl) {
+                    bgOverlay.style.backgroundImage = "url('" + dataUrl + "')";
+                    bgOverlay.style.display = "block";
+                    bgOverlay.style.filter = "blur(" + (savedSettings.backgroundImageBlur || 0) + "px)";
+                    bgOverlay.style.opacity = savedSettings.backgroundImageOpacity !== undefined
+                        ? savedSettings.backgroundImageOpacity
+                        : 1;
+                } else {
+                    bgOverlay.style.display = "none";
+                }
+            } else {
+                bgOverlay.style.display = "none";
+                bgOverlay.style.backgroundImage = "none";
+                document.body.style.backgroundColor = savedSettings.backgroundColor || "transparent";
+            }
+
+            if (rendition) {
+                rendition.getContents().forEach(function(content) {
+                    applyStylesToContents(content);
+                });
+            }
+        };
+
+        function updateProgress(location) {
+            var bridge = getBridge();
+            if (!bridge || !book || !initialJumpDone) {
+                return;
+            }
+
+            var currentLoc = location || rendition.currentLocation();
+            if (!currentLoc || !currentLoc.start) {
+                return;
+            }
+
+            var percent = book.locations && book.locations.length() > 0
+                ? book.locations.percentageFromCfi(currentLoc.start.cfi)
+                : currentLoc.start.percentage;
+
+            bridge.onLocationChanged(JSON.stringify({
+                start: {
+                    cfi: currentLoc.start.cfi,
+                    percentage: percent
+                },
+                explicitPercentage: percent
+            }));
+        }
+
+        function updatePagination() {
+            if (!rendition || !book) {
+                return;
+            }
+
+            var bridge = getBridge();
+            if (!bridge || !bridge.onPaginationChanged) {
+                return;
+            }
+
+            var currentLocation = rendition.currentLocation();
+            if (!currentLocation || !currentLocation.start) {
+                return;
+            }
+
+            var currentPage = currentLocation.start.index + 1;
+            var totalPages = book.spine ? book.spine.length : 0;
+
+            if (book.locations && book.locations.length() > 0) {
+                currentPage = book.locations.locationFromCfi(currentLocation.start.cfi);
+                totalPages = book.locations.length();
+            }
+
+            bridge.onPaginationChanged(currentPage, totalPages);
+        }
+
+        window.addEventListener("resize", function() {
+            if (rendition) {
+                rendition.resize();
+                updatePagination();
+                scheduleActiveMenuPositionUpdate();
+            }
+        });
+
+        window.addEventListener("scroll", scheduleActiveMenuPositionUpdate, { passive: true });
+        document.addEventListener("scroll", scheduleActiveMenuPositionUpdate, true);
+    </script>
+</body>
+</html>
