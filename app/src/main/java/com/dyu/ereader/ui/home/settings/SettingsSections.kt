@@ -865,84 +865,65 @@ internal fun AboutSection(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f))
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.18f))
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     Text("App Updates", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                     Text(
-                        text = "Check releases, install the latest build, and review what changed.",
+                        text = "Stay current with releases, install the newest build, and review what changed.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainer,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.18f))
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(14.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = when {
-                                    updateUiState.isChecking -> "Checking for updates..."
-                                    updateUiState.updateAvailable && updateUiState.latestRelease != null ->
-                                        "Update available"
-                                    else -> "You're on the latest version"
-                                },
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = if (updateUiState.updateAvailable) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurface
-                                }
-                            )
-                            Text(
-                                text = when {
-                                    updateUiState.updateAvailable && updateUiState.latestRelease != null ->
-                                        "Version ${updateUiState.latestRelease.versionName} is ready to install."
-                                    updateUiState.latestRelease != null ->
-                                        "No updates available. You're currently on the latest version."
-                                    updateUiState.lastCheckedAt != null && updateUiState.errorMessage == null ->
-                                        "No updates available. You're currently on the latest version."
-                                    else -> "Check GitHub for the latest release."
-                                },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            updateUiState.latestRelease?.let { release ->
-                                Text(
-                                    text = "Latest release: ${release.versionName}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                            Text(
-                                text = "Current build: $appVersionLabel",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            updateUiState.lastCheckedAt?.let { checkedAt ->
-                                Text(
-                                    text = "Last checked: ${DateFormat.getMediumDateFormat(LocalContext.current).format(Date(checkedAt))} ${DateFormat.getTimeFormat(LocalContext.current).format(Date(checkedAt))}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
+                    PremiumUpdateHero(
+                        status = when {
+                            updateUiState.isChecking -> "Checking now"
+                            updateUiState.updateAvailable && updateUiState.latestRelease != null -> "Update available"
+                            else -> "Latest version installed"
+                        },
+                        message = when {
+                            updateUiState.updateAvailable && updateUiState.latestRelease != null ->
+                                "Version ${updateUiState.latestRelease.versionName} is ready to install."
+                            updateUiState.latestRelease != null ->
+                                "No updates available. You're currently on the latest version."
+                            updateUiState.lastCheckedAt != null && updateUiState.errorMessage == null ->
+                                "No updates available. You're currently on the latest version."
+                            else -> "Check GitHub for the latest release."
+                        },
+                        updateAvailable = updateUiState.updateAvailable
+                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        PremiumUpdateMetric(
+                            label = "Current build",
+                            value = appVersionLabel
+                        )
+                        PremiumUpdateMetric(
+                            label = "Latest release",
+                            value = updateUiState.latestRelease?.versionName ?: "No release found yet"
+                        )
+                        PremiumUpdateMetric(
+                            label = "Last checked",
+                            value = updateUiState.lastCheckedAt?.let { checkedAt ->
+                                "${DateFormat.getMediumDateFormat(LocalContext.current).format(Date(checkedAt))} ${DateFormat.getTimeFormat(LocalContext.current).format(Date(checkedAt))}"
+                            } ?: "Not checked yet"
+                        )
                     }
                     updateUiState.errorMessage?.let { error ->
-                        Text(
-                            text = error,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.65f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.18f))
+                        ) {
+                            Text(
+                                text = error,
+                                modifier = Modifier.padding(14.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
                     }
                     if (updateUiState.updateAvailable && updateUiState.latestRelease != null) {
                         Button(
@@ -954,7 +935,7 @@ internal fun AboutSection(
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(14.dp),
+                            shape = RoundedCornerShape(18.dp),
                             enabled = !updateUiState.isPreparingInstall
                         ) {
                             Icon(Icons.Rounded.FileDownload, null, modifier = Modifier.size(18.dp))
@@ -969,49 +950,29 @@ internal fun AboutSection(
                             )
                         }
                     }
-                    OutlinedButton(
-                        onClick = onCheckForUpdates,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                    ) {
-                        Icon(Icons.Rounded.CloudSync, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text(if (updateUiState.isChecking) "Checking..." else "Check For Updates", fontWeight = FontWeight.Bold)
-                    }
-                    OutlinedButton(
-                        onClick = onToggleLatestChangelog,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
+                    PremiumUpdateAction(
+                        icon = Icons.Rounded.CloudSync,
+                        title = if (updateUiState.isChecking) "Checking..." else "Check for updates",
+                        subtitle = "Refresh the latest release information from GitHub.",
+                        onClick = onCheckForUpdates
+                    )
+                    PremiumUpdateAction(
+                        icon = Icons.Rounded.Description,
+                        title = if (updateUiState.showLatestReleaseDetails) "Hide latest changelog" else "View latest changelog",
+                        subtitle = "See the newest release notes inside the app.",
                         enabled = updateUiState.latestRelease != null,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                    ) {
-                        Icon(Icons.Rounded.Description, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            if (updateUiState.showLatestReleaseDetails) {
-                                "Hide Latest Changelog"
-                            } else {
-                                "View Latest Changelog"
-                            },
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    OutlinedButton(
-                        onClick = onToggleReleaseHistory,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                    ) {
-                        Icon(Icons.Rounded.History, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            if (updateUiState.isLoadingReleaseHistory) "Loading Release History..."
-                            else if (updateUiState.showReleaseHistory) "Hide Release History"
-                            else "View Release History",
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                        onClick = onToggleLatestChangelog
+                    )
+                    PremiumUpdateAction(
+                        icon = Icons.Rounded.History,
+                        title = when {
+                            updateUiState.isLoadingReleaseHistory -> "Loading release history..."
+                            updateUiState.showReleaseHistory -> "Hide release history"
+                            else -> "View release history"
+                        },
+                        subtitle = "Browse earlier versions and open their release pages.",
+                        onClick = onToggleReleaseHistory
+                    )
                     TextButton(onClick = onPreviewUpdateState, modifier = Modifier.align(Alignment.End)) {
                         Text("Preview Update UI")
                     }
@@ -1155,6 +1116,149 @@ internal fun AboutSection(
                     onCheckedChange = onHideBetaFeaturesChanged
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun PremiumUpdateHero(
+    status: String,
+    message: String,
+    updateAvailable: Boolean
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = if (updateAvailable) {
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.88f)
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        },
+        border = BorderStroke(
+            1.dp,
+            if (updateAvailable) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+            } else {
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.18f)
+            }
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = status,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold,
+                color = if (updateAvailable) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (updateAvailable) {
+                    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f)
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun PremiumUpdateMetric(
+    label: String,
+    value: String
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.16f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+private fun PremiumUpdateAction(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.16f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = if (enabled) 1f else 0.5f)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.padding(10.dp).size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }
