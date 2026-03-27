@@ -3,22 +3,23 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Monochrome book icon for system displays -->
-    <!-- Left page -->
     <path
         android:fillColor="#000000"
-        android:pathData="M20,30c-3.31,0 -6,2.69 -6,6v42c0,3.31 2.69,6 6,6h28V30H20z" />
-    <!-- Right page -->
+        android:pathData="M30,18H78C82.418,18 86,21.582 86,26V80C86,84.418 82.418,88 78,88H30C25.582,88 22,84.418 22,80V26C22,21.582 25.582,18 30,18Z" />
     <path
         android:fillColor="#000000"
-        android:pathData="M48,30v54h28c3.31,0 6,-2.69 6,-6V36c0,-3.31 -2.69,-6 -6,-6H48z"
-        android:fillAlpha="0.6" />
-    <!-- Center spine -->
+        android:fillAlpha="0.22"
+        android:pathData="M30,18H48C53.523,18 58,22.477 58,28V88H30C25.582,88 22,84.418 22,80V26C22,21.582 25.582,18 30,18Z" />
     <path
         android:fillColor="#000000"
-        android:pathData="M48,30h3v54h-3z" />
-    <!-- Text lines indicating pages -->
+        android:fillAlpha="0.64"
+        android:pathData="M54,27C56.209,27 58,28.791 58,31V88H54C49.891,84.919 45.225,83.379 40,83.379H30C26.686,83.379 24,80.693 24,77.379V33C24,29.686 26.686,27 30,27H54Z" />
     <path
         android:fillColor="#000000"
-        android:pathData="M28,42h12v1.5h-12zM28,48h14v1.5h-14zM28,54h12v1.5h-12zM56,42h12v1.5h-12zM56,48h14v1.5h-14zM56,54h12v1.5h-12z" />
+        android:fillAlpha="0.86"
+        android:pathData="M54,27H78C81.314,27 84,29.686 84,33V77.379C84,80.693 81.314,83.379 78,83.379H68C62.775,83.379 58.109,84.919 54,88V27Z" />
+    <path
+        android:fillColor="#000000"
+        android:fillAlpha="0.42"
+        android:pathData="M49,18H59C61.761,18 64,20.239 64,23V40L54,34L44,40V23C44,20.239 46.239,18 49,18Z" />
 </vector>

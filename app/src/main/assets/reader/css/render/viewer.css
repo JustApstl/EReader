@@ -1,0 +1,301 @@
+/* Live reader viewport, compositor layers, and drag state */
+#viewer-stage {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2;
+    background-color: transparent !important;
+    overflow-anchor: none !important;
+}
+
+#viewer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent !important;
+    overflow-anchor: none !important;
+}
+
+#viewer iframe {
+    width: 100% !important;
+    height: 100% !important;
+    background-color: transparent !important;
+    pointer-events: auto !important;
+    border-radius: 0;
+    box-shadow: none;
+    outline: none;
+    border: none;
+}
+
+.page-preview iframe {
+    width: 100% !important;
+    height: 100% !important;
+    background-color: transparent !important;
+    pointer-events: none !important;
+    border-radius: 0;
+    box-shadow: none;
+    outline: none;
+    border: none;
+}
+
+body.is-scrolled #viewer iframe {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+#page-turn-compositor {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s ease-out;
+}
+
+#page-flip-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    z-index: 6;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.08s ease-out;
+}
+
+#paper-turn-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    z-index: 7;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.08s ease-out;
+}
+
+.paper-turn-host,
+.paper-turn-book {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.paper-turn-book {
+    transform-style: preserve-3d;
+    perspective: 2200px;
+}
+
+.paper-turn-page,
+.paper-turn-book .turn-page,
+.paper-turn-book .turn-page-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: visible !important;
+    background: transparent !important;
+}
+
+.paper-turn-book .turn-page-wrapper {
+    filter: drop-shadow(0 16px 34px rgba(0, 0, 0, 0.22));
+}
+
+.paper-turn-book .page,
+.paper-turn-book .turn-page {
+    backface-visibility: hidden;
+}
+
+.paper-turn-book .shadow,
+.paper-turn-book .ashadow,
+.paper-turn-book .bshadow {
+    opacity: 1 !important;
+}
+
+.paper-turn-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    pointer-events: none;
+}
+
+.page-flip-host {
+    position: absolute;
+    inset: 0;
+}
+
+.page-flip-host .stf__parent,
+.page-flip-host .stf__wrapper,
+.page-flip-host .stf__block {
+    width: 100%;
+    height: 100%;
+}
+
+.page-flip-host .stf__block {
+    perspective: 2800px;
+}
+
+.page-flip-host .stf__item {
+    backface-visibility: hidden;
+    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.18));
+}
+
+.page-flip-snapshot {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    border-radius: 0;
+}
+
+.page-flip-snapshot-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    pointer-events: none;
+}
+
+body.is-paged #viewer-stage,
+body.is-paged #page-turn-compositor,
+body.is-paged #page-flip-overlay,
+body.is-paged #paper-turn-overlay {
+    left: var(--reader-page-horizontal-margin, 0px);
+    right: var(--reader-page-horizontal-margin, 0px);
+    width: auto;
+}
+
+body.is-scrolled #viewer-stage,
+body.is-scrolled #page-turn-compositor,
+body.is-scrolled #page-flip-overlay,
+body.is-scrolled #paper-turn-overlay {
+    left: 0;
+    right: 0;
+    width: 100vw;
+}
+
+body.compositor-active #page-turn-compositor {
+    opacity: 1;
+}
+
+body.page-flip-live-active #page-flip-overlay {
+    opacity: 1;
+}
+
+body.paper-turn-live-active #paper-turn-overlay {
+    opacity: 1;
+}
+
+body.compositor-active #viewer-stage {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+body.page-flip-live-active #viewer-stage,
+body.page-flip-live-active #page-turn-compositor {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+body.paper-turn-live-active #viewer-stage,
+body.paper-turn-live-active #page-turn-compositor,
+body.paper-turn-live-active #page-flip-overlay {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+body.page-flip-live-active #turn-shadow {
+    opacity: 0.18;
+}
+
+body.paper-turn-live-active #turn-shadow {
+    opacity: 0.24;
+}
+
+.page-preview {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transform-origin: var(--preview-origin, center center);
+    transform: perspective(var(--preview-perspective, 1800px))
+        translate3d(var(--preview-translate-x, 0px), var(--preview-translate-y, 0px), 0)
+        scale(var(--preview-scale, 1))
+        rotateY(var(--preview-rotate-y, 0deg))
+        rotateZ(var(--preview-rotate-z, 0deg));
+    clip-path: inset(0 var(--preview-clip-right, 0px) 0 var(--preview-clip-left, 0px));
+    filter: brightness(var(--preview-brightness, 1));
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+        clip-path 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.12s ease-out,
+        filter 0.12s ease-out;
+    will-change: transform, clip-path, opacity, filter;
+}
+
+body.preview-visible .page-preview {
+    opacity: var(--preview-opacity, 0);
+}
+
+.page-preview-current {
+    z-index: 3;
+}
+
+.page-preview-next,
+.page-preview-prev {
+    z-index: 2;
+}
+
+.page-preview::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.16s ease-out;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.08),
+        rgba(255, 255, 255, 0.02) 18%,
+        rgba(0, 0, 0, 0.08) 72%,
+        rgba(0, 0, 0, 0.14)
+    );
+}
+
+.page-preview-current::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: var(--preview-shadow-opacity, 0);
+    transition: opacity 0.16s ease-out;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.16),
+        rgba(255, 255, 255, 0.03) 22%,
+        rgba(0, 0, 0, 0.12) 62%,
+        rgba(0, 0, 0, 0.22)
+    );
+    mix-blend-mode: screen;
+}
+
+body.preview-next #page-preview-next::before,
+body.preview-prev #page-preview-prev::before {
+    opacity: 0.18;
+}
+
+body.dragging-page .page-preview,
+body.dragging-page #turn-shadow {
+    transition: none !important;
+}
+
+#turn-shadow {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.16s ease-out;
+}

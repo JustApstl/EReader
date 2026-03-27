@@ -1,0 +1,25 @@
+/* Shared reader canvas and background primitives */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden !important;
+    background-color: transparent !important;
+    -webkit-tap-highlight-color: transparent;
+    overflow-anchor: none !important;
+}
+
+#bg-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    display: none;
+}

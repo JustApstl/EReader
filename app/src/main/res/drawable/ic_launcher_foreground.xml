@@ -3,29 +3,42 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Modern Book Icon with better design -->
-    <!-- Book cover (left page) -->
+    <path
+        android:fillColor="#091824"
+        android:fillAlpha="0.14"
+        android:pathData="M28,20H80C84.418,20 88,23.582 88,28V82C88,86.418 84.418,90 80,90H28C23.582,90 20,86.418 20,82V28C20,23.582 23.582,20 28,20Z" />
+    <path
+        android:fillColor="#F7FBFF"
+        android:pathData="M30,18H78C82.418,18 86,21.582 86,26V80C86,84.418 82.418,88 78,88H30C25.582,88 22,84.418 22,80V26C22,21.582 25.582,18 30,18Z" />
+    <path
+        android:fillColor="#DCEAF6"
+        android:pathData="M30,18H48C53.523,18 58,22.477 58,28V88H30C25.582,88 22,84.418 22,80V26C22,21.582 25.582,18 30,18Z" />
+    <path
+        android:fillColor="#17344C"
+        android:pathData="M54,27C56.209,27 58,28.791 58,31V88H54C49.891,84.919 45.225,83.379 40,83.379H30C26.686,83.379 24,80.693 24,77.379V33C24,29.686 26.686,27 30,27H54Z" />
+    <path
+        android:fillColor="#204867"
+        android:pathData="M54,27H78C81.314,27 84,29.686 84,33V77.379C84,80.693 81.314,83.379 78,83.379H68C62.775,83.379 58.109,84.919 54,88V27Z" />
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M20,30c-3.31,0 -6,2.69 -6,6v42c0,3.31 2.69,6 6,6h28V30H20z" />
-    <!-- Book back (right page) -->
+        android:fillAlpha="0.92"
+        android:pathData="M32,32H50C52.209,32 54,33.791 54,36V80.638C50.256,78.425 46.034,77.319 41.333,77.319H32C30.895,77.319 30,76.424 30,75.319V34C30,32.895 30.895,32 32,32Z" />
     <path
-        android:fillColor="#E3F2FD"
-        android:pathData="M48,30v54h28c3.31,0 6,-2.69 6,-6V36c0,-3.31 -2.69,-6 -6,-6H48z" />
-    <!-- Center spine -->
+        android:fillColor="#F3F8FD"
+        android:pathData="M58,32H76C77.105,32 78,32.895 78,34V75.319C78,76.424 77.105,77.319 76,77.319H66.667C61.966,77.319 57.744,78.425 54,80.638V36C54,33.791 55.791,32 58,32Z" />
     <path
-        android:fillColor="#BBDEFB"
-        android:pathData="M48,30h3v54h-3z" />
-    <!-- Page decorative lines on left page -->
+        android:fillColor="#7CC7F2"
+        android:pathData="M35,41H49V44H35Z
+            M35,48H49V51H35Z
+            M35,55H46V58H35Z
+            M59,41H73V44H59Z
+            M59,48H73V51H59Z
+            M59,55H70V58H59Z" />
     <path
-        android:fillColor="#64B5F6"
-        android:pathData="M28,42h12v2h-12zM28,48h14v2h-14zM28,54h12v2h-12z" />
-    <!-- Page decorative lines on right page -->
+        android:fillColor="#4DD0B3"
+        android:pathData="M49,18H59C61.761,18 64,20.239 64,23V40L54,34L44,40V23C44,20.239 46.239,18 49,18Z" />
     <path
-        android:fillColor="#64B5F6"
-        android:pathData="M56,42h12v2h-12zM56,48h14v2h-14zM56,54h12v2h-12z" />
-    <!-- Top accent ribbon/bookmark -->
-    <path
-        android:fillColor="#E91E63"
-        android:pathData="M70,28c1.66,0 3,1.34 3,3v8l-8,0l0,-8c0,-1.66 1.34,-3 3,-3z" />
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.28"
+        android:pathData="M34,24H74C75.105,24 76,24.895 76,26C76,27.105 75.105,28 74,28H34C32.895,28 32,27.105 32,26C32,24.895 32.895,24 34,24Z" />
 </vector>

@@ -1,0 +1,226 @@
+/* Release animations and page turn variants */
+body.turning-next #turn-shadow {
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.04) 42%, transparent 72%);
+    opacity: 0.1;
+}
+
+body.turning-prev #turn-shadow {
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.04) 42%, transparent 72%);
+    opacity: 0.1;
+}
+
+#viewer-stage.page-turning-next,
+#viewer-stage.page-turning-prev {
+    animation-duration: var(--stage-turn-duration, 164ms);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-fill-mode: both;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    will-change: transform, filter, opacity;
+}
+
+#viewer-stage.page-turning-next {
+    transform-origin: left center;
+    animation-name: stage-turn-swap;
+}
+
+#viewer-stage.page-turning-prev {
+    transform-origin: right center;
+    animation-name: stage-turn-swap;
+}
+
+@keyframes stage-turn-swap {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1) rotateY(0deg) rotateZ(0deg);
+        filter: brightness(1);
+        opacity: 1;
+    }
+    48% {
+        transform:
+            translate3d(var(--stage-turn-translate-x, 0px), var(--stage-turn-translate-y, 0px), 0)
+            scale(var(--stage-turn-scale, 0.992))
+            rotateY(var(--stage-turn-rotate-y, 0deg))
+            rotateZ(var(--stage-turn-rotate-z, 0deg));
+        filter: brightness(var(--stage-turn-brightness, 0.986));
+        opacity: 0.96;
+    }
+    100% {
+        transform: translate3d(0, 0, 0) scale(1) rotateY(0deg) rotateZ(0deg);
+        filter: brightness(1);
+        opacity: 1;
+    }
+}
+
+#viewer-stage.transition-default-next,
+#viewer-stage.transition-default-prev {
+    --stage-turn-scale: 0.992;
+    --stage-turn-brightness: 0.988;
+}
+
+#viewer-stage.transition-default-next {
+    --stage-turn-translate-x: -24px;
+    --stage-turn-rotate-y: -5deg;
+}
+
+#viewer-stage.transition-default-prev {
+    --stage-turn-translate-x: 24px;
+    --stage-turn-rotate-y: 5deg;
+}
+
+#viewer-stage.transition-tilt-next,
+#viewer-stage.transition-tilt-prev {
+    --stage-turn-scale: 0.993;
+    --stage-turn-brightness: 0.989;
+}
+
+#viewer-stage.transition-tilt-next {
+    --stage-turn-translate-x: -22px;
+    --stage-turn-translate-y: 2px;
+    --stage-turn-rotate-z: -1deg;
+}
+
+#viewer-stage.transition-tilt-prev {
+    --stage-turn-translate-x: 22px;
+    --stage-turn-translate-y: 2px;
+    --stage-turn-rotate-z: 1deg;
+}
+
+#viewer-stage.transition-card-next,
+#viewer-stage.transition-card-prev {
+    --stage-turn-scale: 0.988;
+    --stage-turn-brightness: 0.984;
+}
+
+#viewer-stage.transition-card-next {
+    --stage-turn-translate-x: -24px;
+}
+
+#viewer-stage.transition-card-prev {
+    --stage-turn-translate-x: 24px;
+}
+
+#viewer-stage.transition-flip-next,
+#viewer-stage.transition-flip-prev {
+    --stage-turn-scale: 0.993;
+    --stage-turn-brightness: 0.987;
+}
+
+#viewer-stage.transition-flip-next {
+    --stage-turn-translate-x: -18px;
+    --stage-turn-rotate-y: -9deg;
+}
+
+#viewer-stage.transition-flip-prev {
+    --stage-turn-translate-x: 18px;
+    --stage-turn-rotate-y: 9deg;
+}
+
+#viewer-stage.transition-cube-next,
+#viewer-stage.transition-cube-prev {
+    --stage-turn-scale: 0.992;
+    --stage-turn-brightness: 0.986;
+}
+
+#viewer-stage.transition-cube-next {
+    --stage-turn-translate-x: -20px;
+    --stage-turn-rotate-y: -8deg;
+}
+
+#viewer-stage.transition-cube-prev {
+    --stage-turn-translate-x: 20px;
+    --stage-turn-rotate-y: 8deg;
+}
+
+#viewer-stage.transition-roll-next,
+#viewer-stage.transition-roll-prev {
+    --stage-turn-scale: 0.992;
+    --stage-turn-brightness: 0.986;
+}
+
+#viewer-stage.transition-roll-next {
+    --stage-turn-translate-x: -24px;
+    --stage-turn-rotate-z: -2deg;
+}
+
+#viewer-stage.transition-roll-prev {
+    --stage-turn-translate-x: 24px;
+    --stage-turn-rotate-z: 2deg;
+}
+
+#viewer-stage.transition-paper-next,
+#viewer-stage.transition-paper-prev {
+    --stage-turn-scale: 0.994;
+    --stage-turn-brightness: 0.99;
+}
+
+#viewer-stage.transition-paper-next {
+    --stage-turn-translate-x: -30px;
+    --stage-turn-rotate-y: -16deg;
+    --stage-turn-rotate-z: -0.8deg;
+}
+
+#viewer-stage.transition-paper-prev {
+    --stage-turn-translate-x: 30px;
+    --stage-turn-rotate-y: 16deg;
+    --stage-turn-rotate-z: 0.8deg;
+}
+
+#page-preview-current.page-turning-next {
+    transform-origin: left center !important;
+    transform: translate3d(-24px, 0, 0) scale(0.992);
+}
+
+#page-preview-current.page-turning-prev {
+    transform-origin: right center !important;
+    transform: translate3d(24px, 0, 0) scale(0.992);
+}
+
+#page-preview-current.transition-tilt-next.page-turning-next {
+    transform: translate3d(-22px, 2px, 0) scale(0.993) rotateZ(-1deg);
+}
+
+#page-preview-current.transition-tilt-prev.page-turning-prev {
+    transform: translate3d(22px, 2px, 0) scale(0.993) rotateZ(1deg);
+}
+
+#page-preview-current.transition-card-next.page-turning-next {
+    transform: translate3d(-24px, 0, 0) scale(0.988);
+}
+
+#page-preview-current.transition-card-prev.page-turning-prev {
+    transform: translate3d(24px, 0, 0) scale(0.988);
+}
+
+#page-preview-current.transition-flip-next.page-turning-next {
+    transform: perspective(1800px) rotateY(-9deg) translate3d(-18px, 0, 0) scale(0.993);
+}
+
+#page-preview-current.transition-flip-prev.page-turning-prev {
+    transform: perspective(1800px) rotateY(9deg) translate3d(18px, 0, 0) scale(0.993);
+}
+
+#page-preview-current.transition-cube-next.page-turning-next {
+    transform: perspective(1800px) rotateY(-8deg) translate3d(-20px, 0, 0) scale(0.992);
+}
+
+#page-preview-current.transition-cube-prev.page-turning-prev {
+    transform: perspective(1800px) rotateY(8deg) translate3d(20px, 0, 0) scale(0.992);
+}
+
+#page-preview-current.transition-roll-next.page-turning-next {
+    transform: translate3d(-24px, 0, 0) rotateZ(-2deg) scale(0.992);
+}
+
+#page-preview-current.transition-roll-prev.page-turning-prev {
+    transform: translate3d(24px, 0, 0) rotateZ(2deg) scale(0.992);
+}
+
+#page-preview-current.transition-paper-next.page-turning-next {
+    transform-origin: left center !important;
+    transform: perspective(1800px) translate3d(-30px, 0, 0) rotateY(-16deg) rotateZ(-0.8deg) scale(0.994);
+}
+
+#page-preview-current.transition-paper-prev.page-turning-prev {
+    transform-origin: right center !important;
+    transform: perspective(1800px) translate3d(30px, 0, 0) rotateY(16deg) rotateZ(0.8deg) scale(0.994);
+}

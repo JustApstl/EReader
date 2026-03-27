@@ -1,4 +1,6 @@
 
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("com.google.devtools.ksp")
@@ -11,11 +13,33 @@ android {
     compileSdk = 36
 
     defaultConfig {
+        val localProperties = Properties().apply {
+            val localPropertiesFile = rootProject.file("local.properties")
+            if (localPropertiesFile.exists()) {
+                localPropertiesFile.inputStream().use(::load)
+            }
+        }
+        val dropboxAppKey = providers.gradleProperty("DROPBOX_APP_KEY")
+            .orElse(providers.environmentVariable("DROPBOX_APP_KEY"))
+            .orElse(localProperties.getProperty("DROPBOX_APP_KEY") ?: "")
+            .orElse("")
+        val githubReleaseOwner = providers.gradleProperty("GITHUB_RELEASE_OWNER")
+            .orElse(providers.environmentVariable("GITHUB_RELEASE_OWNER"))
+            .orElse(localProperties.getProperty("GITHUB_RELEASE_OWNER") ?: "JustApstl")
+            .orElse("JustApstl")
+        val githubReleaseRepo = providers.gradleProperty("GITHUB_RELEASE_REPO")
+            .orElse(providers.environmentVariable("GITHUB_RELEASE_REPO"))
+            .orElse(localProperties.getProperty("GITHUB_RELEASE_REPO") ?: "EReader")
+            .orElse("EReader")
         applicationId = "com.dyu.ereader"
         minSdk = 24
         targetSdk = 36
-        versionCode = 6
-        versionName = "2.2.0"
+        versionCode = 7
+        versionName = "2.2.1"
+        buildConfigField("String", "MOBI_CONVERTER_URL", "\"\"")
+        buildConfigField("String", "DROPBOX_APP_KEY", "\"${dropboxAppKey.get()}\"")
+        buildConfigField("String", "GITHUB_RELEASE_OWNER", "\"${githubReleaseOwner.get()}\"")
+        buildConfigField("String", "GITHUB_RELEASE_REPO", "\"${githubReleaseRepo.get()}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -38,6 +62,12 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+        }
     }
     packaging {
         resources {
@@ -68,6 +98,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.jsoup)
     
