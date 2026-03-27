@@ -34,8 +34,8 @@ android {
         applicationId = "com.dyu.ereader"
         minSdk = 24
         targetSdk = 36
-        versionCode = 9
-        versionName = "2.2.3"
+        versionCode = 10
+        versionName = "2.2.4"
         buildConfigField("String", "MOBI_CONVERTER_URL", "\"\"")
         buildConfigField("String", "DROPBOX_APP_KEY", "\"${dropboxAppKey.get()}\"")
         buildConfigField("String", "GITHUB_RELEASE_OWNER", "\"${githubReleaseOwner.get()}\"")
