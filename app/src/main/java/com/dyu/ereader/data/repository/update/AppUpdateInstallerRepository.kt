@@ -35,21 +35,7 @@ class AppUpdateInstallerRepository @Inject constructor(
                 }
             }
             val targetFile = File(updatesDir, fileName)
-            val request = Request.Builder()
-                .url(downloadUrl)
-                .header("Accept", "application/octet-stream")
-                .header("User-Agent", "${context.packageName}/updater")
-                .build()
-
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    throw IllegalStateException("Unable to download the update package right now.")
-                }
-                val body = response.body
-                targetFile.outputStream().use { output ->
-                    body.byteStream().copyTo(output)
-                }
-            }
+            downloadApk(downloadUrl, targetFile)
 
             val apkUri = FileProvider.getUriForFile(
                 context,
@@ -89,6 +75,49 @@ class AppUpdateInstallerRepository @Inject constructor(
         val rawName = release.assetName?.takeIf { it.endsWith(".apk", ignoreCase = true) }
             ?: "ereader-${release.versionName}.apk"
         return rawName.replace(Regex("[^A-Za-z0-9._-]"), "_")
+    }
+
+    private fun downloadApk(downloadUrl: String, targetFile: File) {
+        val primaryRequest = Request.Builder()
+            .url(downloadUrl)
+            .header("Accept", "application/octet-stream")
+            .header("User-Agent", "${context.packageName}/updater")
+            .build()
+
+        val secondaryRequest = Request.Builder()
+            .url(downloadUrl)
+            .header("User-Agent", "Mozilla/5.0 (Android) EReader")
+            .build()
+
+        val primaryResult = executeDownload(primaryRequest, targetFile)
+        if (primaryResult == null) {
+            return
+        }
+
+        val secondaryResult = executeDownload(secondaryRequest, targetFile)
+        if (secondaryResult == null) {
+            return
+        }
+
+        throw IllegalStateException(
+            "Unable to download the update package right now. GitHub returned HTTP $secondaryResult."
+        )
+    }
+
+    private fun executeDownload(request: Request, targetFile: File): Int? {
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                return response.code
+            }
+            val body = response.body
+            targetFile.outputStream().use { output ->
+                body.byteStream().copyTo(output)
+            }
+            if (targetFile.length() <= 0L) {
+                throw IllegalStateException("The downloaded update package is empty.")
+            }
+            return null
+        }
     }
 
     private companion object {

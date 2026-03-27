@@ -334,16 +334,18 @@ class MainViewModel @Inject constructor(
     }
 
     fun previewUpdateState() {
+        val baseRelease = _appUpdateState.value.latestRelease
+        val previewVersion = baseRelease?.versionName ?: CURRENT_VERSION_NAME
         val previewRelease = com.dyu.ereader.data.model.update.AppReleaseInfo(
-            versionName = "2.3.0",
-            tagName = "v2.3.0",
-            title = "Version 2.3.0",
-            notes = "Preview release notes for testing the updater UI.\n\n- Refined update surfaces\n- Improved release history\n- Added in-app update notification testing",
-            htmlUrl = "https://github.com/JustApstl/EReader/releases",
-            downloadUrl = "https://github.com/JustApstl/EReader/releases",
-            assetName = "EReader-universal-release.apk",
-            assetLabel = "Universal Release",
-            publishedAt = System.currentTimeMillis()
+            versionName = previewVersion,
+            tagName = baseRelease?.tagName ?: "v$previewVersion",
+            title = baseRelease?.title ?: "Version $previewVersion",
+            notes = baseRelease?.notes ?: "Preview release notes for testing the updater UI.\n\n- Refined update surfaces\n- Improved release history\n- Added in-app update notification testing",
+            htmlUrl = baseRelease?.htmlUrl ?: "https://github.com/JustApstl/EReader/releases",
+            downloadUrl = baseRelease?.downloadUrl,
+            assetName = baseRelease?.assetName ?: "EReader-preview.apk",
+            assetLabel = baseRelease?.assetLabel ?: "Preview Build",
+            publishedAt = baseRelease?.publishedAt ?: System.currentTimeMillis()
         )
         _appUpdateState.update { current ->
             current.copy(

@@ -71,9 +71,8 @@ class AppUpdateRepository @Inject constructor(
         }
 
         runCatching {
-            val latest = fetchRelease(
-                url = "https://api.github.com/repos/${BuildConfig.GITHUB_RELEASE_OWNER}/${BuildConfig.GITHUB_RELEASE_REPO}/releases/latest"
-            ) ?: throw IllegalStateException("No release data returned from GitHub")
+            val latest = fetchLatestRelease()
+                ?: throw IllegalStateException("No release data returned from GitHub")
 
             val checkedAt = System.currentTimeMillis()
             preferencesStore.cacheLatestRelease(latest)
@@ -142,6 +141,12 @@ class AppUpdateRepository @Inject constructor(
                 url = "https://api.github.com/repos/${BuildConfig.GITHUB_RELEASE_OWNER}/${BuildConfig.GITHUB_RELEASE_REPO}/releases/tags/$tag"
             )
         }
+    }
+
+    private fun fetchLatestRelease(): AppReleaseInfo? {
+        val baseUrl = "https://api.github.com/repos/${BuildConfig.GITHUB_RELEASE_OWNER}/${BuildConfig.GITHUB_RELEASE_REPO}"
+        return fetchRelease("$baseUrl/releases/latest")
+            ?: fetchReleaseList("$baseUrl/releases?per_page=1").firstOrNull()
     }
 
     private fun fetchRelease(url: String): AppReleaseInfo? {
