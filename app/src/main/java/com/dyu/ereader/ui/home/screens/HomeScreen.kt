@@ -99,6 +99,7 @@ fun HomeScreen(
     onReaderControlOrderChanged: (List<ReaderControl>) -> Unit,
     onReaderSettingsChanged: (ReaderSettings) -> Unit,
     onNotificationsEnabledChanged: (Boolean) -> Unit,
+    onUpdateNotificationsEnabledChanged: (Boolean) -> Unit,
     onReadingReminderEnabledChanged: (Boolean) -> Unit,
     onReadingReminderTimeChanged: (Int, Int) -> Unit,
     onSendTestNotification: () -> Unit,
@@ -464,17 +465,18 @@ fun HomeScreen(
                         onReaderControlOrderChanged = onReaderControlOrderChanged,
                         onReaderSettingsChanged = onReaderSettingsChanged,
                         onNotificationsEnabledChanged = onNotificationsEnabledChanged,
-                onReadingReminderEnabledChanged = onReadingReminderEnabledChanged,
-                onReadingReminderTimeChanged = onReadingReminderTimeChanged,
-        onSendTestNotification = onSendTestNotification,
-        updateUiState = updateUiState,
-        onCheckForUpdates = onCheckForUpdates,
-        onInstallLatestUpdate = onInstallLatestUpdate,
-        onToggleLatestChangelog = onToggleLatestChangelog,
-        onToggleReleaseHistory = onToggleReleaseHistory,
-        onPreviewUpdateState = onPreviewUpdateState,
-        onConsumePendingCloudAuthUri = onConsumePendingCloudAuthUri
-    )
+                        onUpdateNotificationsEnabledChanged = onUpdateNotificationsEnabledChanged,
+                        onReadingReminderEnabledChanged = onReadingReminderEnabledChanged,
+                        onReadingReminderTimeChanged = onReadingReminderTimeChanged,
+                        onSendTestNotification = onSendTestNotification,
+                        updateUiState = updateUiState,
+                        onCheckForUpdates = onCheckForUpdates,
+                        onInstallLatestUpdate = onInstallLatestUpdate,
+                        onToggleLatestChangelog = onToggleLatestChangelog,
+                        onToggleReleaseHistory = onToggleReleaseHistory,
+                        onPreviewUpdateState = onPreviewUpdateState,
+                        onConsumePendingCloudAuthUri = onConsumePendingCloudAuthUri
+                    )
                 }
             }
         }

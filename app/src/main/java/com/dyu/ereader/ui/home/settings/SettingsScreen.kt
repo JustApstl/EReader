@@ -88,6 +88,7 @@ data class SettingsEvents(
     val onReaderControlOrderChange: (List<ReaderControl>) -> Unit,
     val onReaderSettingsChanged: (ReaderSettings) -> Unit,
     val onNotificationsEnabledChanged: (Boolean) -> Unit,
+    val onUpdateNotificationsEnabledChanged: (Boolean) -> Unit,
     val onReadingReminderEnabledChanged: (Boolean) -> Unit,
     val onReadingReminderTimeChanged: (Int, Int) -> Unit,
     val onSendTestNotification: () -> Unit,
@@ -171,7 +172,7 @@ fun SettingsArea(
     ) else currentDestination == SettingsDestination.BACKUP
     val showNotificationsSection = if (isSearching) normalizedSearchQuery.matchesSettingsSearch(
         "notifications", "reminder", "reading reminder", "alerts", "test notification",
-        "permission", "push", "daily reminder"
+        "permission", "push", "daily reminder", "update notifications", "app updates"
     ) else currentDestination == SettingsDestination.NOTIFICATIONS
     val showStorageSection = if (isSearching) normalizedSearchQuery.matchesSettingsSearch(
         "storage", "folder", "library access", "revoke", "manage", "location", "relocate",

@@ -60,6 +60,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -500,6 +501,10 @@ internal fun NotificationsSection(
             NotificationPermissionAction.ENABLE_NOTIFICATIONS -> {
                 events.onNotificationsEnabledChanged(granted)
             }
+            NotificationPermissionAction.ENABLE_UPDATE_NOTIFICATIONS -> {
+                events.onNotificationsEnabledChanged(granted)
+                events.onUpdateNotificationsEnabledChanged(granted)
+            }
             NotificationPermissionAction.ENABLE_REMINDER -> {
                 events.onNotificationsEnabledChanged(granted)
                 if (granted) {
@@ -583,6 +588,22 @@ internal fun NotificationsSection(
                         requestNotificationPermission(NotificationPermissionAction.ENABLE_NOTIFICATIONS)
                     } else {
                         events.onNotificationsEnabledChanged(enabled)
+                    }
+                }
+            )
+
+            SettingSwitch(
+                title = "Update Notifications",
+                desc = "Notify when a new app release is available.",
+                checked = uiState.display.updateNotificationsEnabled,
+                onCheckedChange = { enabled ->
+                    if (enabled && !permissionGranted) {
+                        requestNotificationPermission(NotificationPermissionAction.ENABLE_UPDATE_NOTIFICATIONS)
+                    } else {
+                        if (enabled && !uiState.display.notificationsEnabled) {
+                            events.onNotificationsEnabledChanged(true)
+                        }
+                        events.onUpdateNotificationsEnabledChanged(enabled)
                     }
                 }
             )
@@ -723,6 +744,7 @@ private data class ReminderPreset(
 
 private enum class NotificationPermissionAction {
     ENABLE_NOTIFICATIONS,
+    ENABLE_UPDATE_NOTIFICATIONS,
     ENABLE_REMINDER,
     SEND_TEST
 }
@@ -849,39 +871,71 @@ internal fun AboutSection(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    Text("App Updates", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                     Text(
-                        text = "App Updates",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                    Text(
-                        text = when {
-                            updateUiState.isChecking -> "Checking for updates from GitHub."
-                            updateUiState.updateAvailable && updateUiState.latestRelease != null ->
-                                "Update available. Version ${updateUiState.latestRelease.versionName} is ready to install."
-                            updateUiState.latestRelease != null ->
-                                "No updates available. You're currently on the latest version."
-                            updateUiState.lastCheckedAt != null && updateUiState.errorMessage == null ->
-                                "No updates available. You're currently on the latest version."
-                            else -> "Check for new releases and review what changed."
-                        },
+                        text = "Check releases, install the latest build, and review what changed.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    updateUiState.latestRelease?.let { release ->
-                        Text(
-                            text = "Latest release: ${release.versionName}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    updateUiState.lastCheckedAt?.let { checkedAt ->
-                        Text(
-                            text = "Last checked: ${DateFormat.getMediumDateFormat(LocalContext.current).format(Date(checkedAt))} ${DateFormat.getTimeFormat(LocalContext.current).format(Date(checkedAt))}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.18f))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = when {
+                                    updateUiState.isChecking -> "Checking for updates..."
+                                    updateUiState.updateAvailable && updateUiState.latestRelease != null ->
+                                        "Update available"
+                                    else -> "You're on the latest version"
+                                },
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = if (updateUiState.updateAvailable) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                }
+                            )
+                            Text(
+                                text = when {
+                                    updateUiState.updateAvailable && updateUiState.latestRelease != null ->
+                                        "Version ${updateUiState.latestRelease.versionName} is ready to install."
+                                    updateUiState.latestRelease != null ->
+                                        "No updates available. You're currently on the latest version."
+                                    updateUiState.lastCheckedAt != null && updateUiState.errorMessage == null ->
+                                        "No updates available. You're currently on the latest version."
+                                    else -> "Check GitHub for the latest release."
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            updateUiState.latestRelease?.let { release ->
+                                Text(
+                                    text = "Latest release: ${release.versionName}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Text(
+                                text = "Current build: $appVersionLabel",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            updateUiState.lastCheckedAt?.let { checkedAt ->
+                                Text(
+                                    text = "Last checked: ${DateFormat.getMediumDateFormat(LocalContext.current).format(Date(checkedAt))} ${DateFormat.getTimeFormat(LocalContext.current).format(Date(checkedAt))}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                     updateUiState.errorMessage?.let { error ->
                         Text(
@@ -958,15 +1012,8 @@ internal fun AboutSection(
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    OutlinedButton(
-                        onClick = onPreviewUpdateState,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                    ) {
-                        Icon(Icons.Rounded.CloudSync, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text("Preview Update UI", fontWeight = FontWeight.Bold)
+                    TextButton(onClick = onPreviewUpdateState, modifier = Modifier.align(Alignment.End)) {
+                        Text("Preview Update UI")
                     }
                     if (updateUiState.showLatestReleaseDetails && updateUiState.latestRelease != null) {
                         val release = updateUiState.latestRelease
@@ -980,6 +1027,12 @@ internal fun AboutSection(
                                 modifier = Modifier.padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
+                                Text(
+                                    text = "Latest Changelog",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
                                 Text(
                                     text = release.title,
                                     style = MaterialTheme.typography.titleSmall,
@@ -1023,6 +1076,13 @@ internal fun AboutSection(
                                 modifier = Modifier.padding(8.dp),
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
+                                Text(
+                                    text = "Release History",
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
                                 if (updateUiState.releaseHistory.isEmpty()) {
                                     Text(
                                         text = "No release history is available yet.",

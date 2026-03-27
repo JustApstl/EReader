@@ -41,8 +41,11 @@ internal fun AppUpdateDialogs(
                     text = buildString {
                         append("Version ")
                         append(release.versionName)
-                        append(" is available.\n\n")
-                        append(release.notes.take(900))
+                        append(" is ready to install.")
+                        release.assetLabel?.takeIf { it.isNotBlank() }?.let { label ->
+                            append("\n\n")
+                            append(label)
+                        }
                     },
                     style = MaterialTheme.typography.bodyMedium
                 )

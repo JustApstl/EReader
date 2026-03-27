@@ -39,6 +39,7 @@ internal fun HomeViewModel.observeHomePreferencesInternal() {
             prefsStore.lastLocalBackupExportAtFlow,
             prefsStore.lastLocalBackupImportAtFlow,
             prefsStore.notificationsEnabledFlow,
+            prefsStore.updateNotificationsEnabledFlow,
             prefsStore.readingReminderEnabledFlow,
             prefsStore.readingReminderHourFlow,
             prefsStore.readingReminderMinuteFlow
@@ -71,9 +72,10 @@ internal fun HomeViewModel.observeHomePreferencesInternal() {
             val lastLocalBackupExportAt = params[22] as Long?
             val lastLocalBackupImportAt = params[23] as Long?
             val notificationsEnabled = params[24] as Boolean
-            val readingReminderEnabled = params[25] as Boolean
-            val readingReminderHour = params[26] as Int
-            val readingReminderMinute = params[27] as Int
+            val updateNotificationsEnabled = params[25] as Boolean
+            val readingReminderEnabled = params[26] as Boolean
+            val readingReminderHour = params[27] as Int
+            val readingReminderMinute = params[28] as Int
 
             analyticsRepo.enableAnalytics(showReaderAnalytics)
 
@@ -102,6 +104,7 @@ internal fun HomeViewModel.observeHomePreferencesInternal() {
                         showReaderExport = showReaderExport,
                         readerControlOrder = readerControlOrder,
                         notificationsEnabled = notificationsEnabled,
+                        updateNotificationsEnabled = updateNotificationsEnabled,
                         readingReminderEnabled = readingReminderEnabled,
                         readingReminderHour = readingReminderHour,
                         readingReminderMinute = readingReminderMinute

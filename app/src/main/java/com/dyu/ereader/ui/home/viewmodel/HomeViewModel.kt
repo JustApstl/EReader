@@ -158,6 +158,7 @@ class HomeViewModel @Inject constructor(
     fun onReaderControlOrderChanged(order: List<ReaderControl>) = handleReaderControlOrderChanged(order)
     fun onReaderSettingsChanged(settings: ReaderSettings) = handleReaderSettingsChanged(settings)
     fun onNotificationsEnabledChanged(enabled: Boolean) = handleNotificationsEnabledChanged(enabled)
+    fun onUpdateNotificationsEnabledChanged(enabled: Boolean) = handleUpdateNotificationsEnabledChanged(enabled)
     fun onReadingReminderEnabledChanged(enabled: Boolean) = handleReadingReminderEnabledChanged(enabled)
     fun onReadingReminderTimeChanged(hour: Int, minute: Int) = handleReadingReminderTimeChanged(hour, minute)
     fun sendTestNotification() = handleSendTestNotification()

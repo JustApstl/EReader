@@ -126,6 +126,7 @@ class ReaderPreferencesStore(private val context: Context) {
         val READING_REMINDER_ENABLED = booleanPreferencesKey("reading_reminder_enabled")
         val READING_REMINDER_HOUR = intPreferencesKey("reading_reminder_hour")
         val READING_REMINDER_MINUTE = intPreferencesKey("reading_reminder_minute")
+        val UPDATE_NOTIFICATIONS_ENABLED = booleanPreferencesKey("update_notifications_enabled")
         val NOTIFICATION_PERMISSION_PROMPTED = booleanPreferencesKey("notification_permission_prompted")
         val UPDATE_LAST_CHECKED_AT = stringPreferencesKey("update_last_checked_at")
         val UPDATE_CACHED_LATEST_RELEASE = stringPreferencesKey("update_cached_latest_release")
@@ -318,6 +319,16 @@ class ReaderPreferencesStore(private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences[Keys.READING_REMINDER_HOUR] = hour.coerceIn(0, 23)
             preferences[Keys.READING_REMINDER_MINUTE] = minute.coerceIn(0, 59)
+        }
+    }
+
+    val updateNotificationsEnabledFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[Keys.UPDATE_NOTIFICATIONS_ENABLED] ?: true
+    }
+
+    suspend fun setUpdateNotificationsEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[Keys.UPDATE_NOTIFICATIONS_ENABLED] = enabled
         }
     }
 

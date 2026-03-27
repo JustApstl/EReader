@@ -65,10 +65,11 @@ class AppUpdateInstallerRepository @Inject constructor(
         }
 
     fun createInstallIntent(install: PendingAppInstall): Intent =
-        Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(Uri.parse(install.uriString), APK_MIME_TYPE)
+        Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
+            data = Uri.parse(install.uriString)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            putExtra(Intent.EXTRA_RETURN_RESULT, true)
         }
 
     private fun sanitizeApkFileName(release: AppReleaseInfo): String {
@@ -120,7 +121,4 @@ class AppUpdateInstallerRepository @Inject constructor(
         }
     }
 
-    private companion object {
-        private const val APK_MIME_TYPE = "application/vnd.android.package-archive"
-    }
 }

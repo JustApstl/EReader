@@ -12,8 +12,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.dyu.ereader.R
+import com.dyu.ereader.data.local.prefs.ReaderPreferencesStore
 import com.dyu.ereader.data.model.update.AppReleaseInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,7 +25,7 @@ class AppUpdateNotificationRepository @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) {
     fun notifyUpdateAvailable(release: AppReleaseInfo) {
-        if (!canPostNotifications()) {
+        if (!canPostNotifications() || !areUpdateNotificationsEnabled()) {
             return
         }
         ensureChannel()
@@ -79,6 +82,14 @@ class AppUpdateNotificationRepository @Inject constructor(
     private fun canPostNotifications(): Boolean {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun areUpdateNotificationsEnabled(): Boolean {
+        val preferencesStore = ReaderPreferencesStore(context)
+        return runBlocking {
+            preferencesStore.notificationsEnabledFlow.first() &&
+                preferencesStore.updateNotificationsEnabledFlow.first()
+        }
     }
 
     private fun releasePendingIntent(release: AppReleaseInfo): PendingIntent {

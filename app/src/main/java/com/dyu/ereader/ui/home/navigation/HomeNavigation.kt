@@ -86,6 +86,7 @@ fun NavGraphBuilder.homeScreen(
             onReaderControlOrderChanged = homeViewModel::onReaderControlOrderChanged,
             onReaderSettingsChanged = homeViewModel::onReaderSettingsChanged,
             onNotificationsEnabledChanged = homeViewModel::onNotificationsEnabledChanged,
+            onUpdateNotificationsEnabledChanged = homeViewModel::onUpdateNotificationsEnabledChanged,
             onReadingReminderEnabledChanged = homeViewModel::onReadingReminderEnabledChanged,
             onReadingReminderTimeChanged = homeViewModel::onReadingReminderTimeChanged,
             onSendTestNotification = homeViewModel::sendTestNotification,

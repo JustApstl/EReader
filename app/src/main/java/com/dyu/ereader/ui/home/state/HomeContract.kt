@@ -54,6 +54,7 @@ data class HomeDisplayPreferences(
     val showReaderExport: Boolean = true,
     val readerControlOrder: List<ReaderControl> = ReaderControl.defaultOrder(),
     val notificationsEnabled: Boolean = false,
+    val updateNotificationsEnabled: Boolean = true,
     val readingReminderEnabled: Boolean = false,
     val readingReminderHour: Int = 20,
     val readingReminderMinute: Int = 0

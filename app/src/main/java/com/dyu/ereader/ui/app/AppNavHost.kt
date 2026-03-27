@@ -3,10 +3,14 @@ package com.dyu.ereader.ui.app
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.dyu.ereader.data.repository.update.AppUpdateInstallerRepository
@@ -32,6 +36,7 @@ fun AppNavHost(
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val pendingBook by mainViewModel.pendingBook.collectAsState()
     val appUpdateState by mainViewModel.appUpdateState.collectAsState()
     val pendingUpdateInstall by mainViewModel.pendingUpdateInstall.collectAsState()
@@ -48,6 +53,18 @@ fun AppNavHost(
         contract = ActivityResultContracts.StartActivityForResult()
     ) {
         mainViewModel.consumePendingUpdateInstall()
+    }
+
+    DisposableEffect(lifecycleOwner, pendingUnknownAppsPermissionInstall?.uriString) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && pendingUnknownAppsPermissionInstall != null) {
+                mainViewModel.resumePendingUpdateInstall()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     // Handle intent-based navigation (e.g., opening a file from outside the app)

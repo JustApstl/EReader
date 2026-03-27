@@ -17,6 +17,10 @@ internal fun HomeViewModel.handleNotificationsEnabledChanged(enabled: Boolean) =
     )
 }
 
+internal fun HomeViewModel.handleUpdateNotificationsEnabledChanged(enabled: Boolean) = viewModelScope.launch {
+    prefsStore.setUpdateNotificationsEnabled(enabled)
+}
+
 internal fun HomeViewModel.handleReadingReminderEnabledChanged(enabled: Boolean) = viewModelScope.launch {
     prefsStore.setReadingReminderEnabled(enabled)
     val notificationsEnabled = prefsStore.notificationsEnabledFlow.first()
