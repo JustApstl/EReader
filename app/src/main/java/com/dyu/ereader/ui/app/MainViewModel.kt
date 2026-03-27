@@ -388,6 +388,7 @@ class MainViewModel @Inject constructor(
         if (changelog != null) {
             _appUpdateState.update { current ->
                 current.copy(
+                    latestRelease = if (!current.updateAvailable) changelog else current.latestRelease,
                     changelogRelease = changelog,
                     showChangelogPrompt = true
                 )

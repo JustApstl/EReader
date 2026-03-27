@@ -94,7 +94,17 @@ internal fun AppUpdateDialogs(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { openRelease(release) }) {
+                TextButton(
+                    onClick = {
+                        runCatching {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(release.htmlUrl)).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                            )
+                        }
+                    }
+                ) {
                     Text("Full Changelog")
                 }
             }
