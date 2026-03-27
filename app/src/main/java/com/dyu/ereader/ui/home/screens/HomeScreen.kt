@@ -108,7 +108,6 @@ fun HomeScreen(
     onInstallLatestUpdate: () -> Unit = {},
     onToggleLatestChangelog: () -> Unit = {},
     onToggleReleaseHistory: () -> Unit = {},
-    onPreviewUpdateState: () -> Unit = {},
     onExportAnnotations: (BookItem) -> Unit,
     onCreateCollection: (String, BookItem) -> Unit,
     onToggleBookInCollection: (String, BookItem) -> Unit,
@@ -474,7 +473,6 @@ fun HomeScreen(
                         onInstallLatestUpdate = onInstallLatestUpdate,
                         onToggleLatestChangelog = onToggleLatestChangelog,
                         onToggleReleaseHistory = onToggleReleaseHistory,
-                        onPreviewUpdateState = onPreviewUpdateState,
                         onConsumePendingCloudAuthUri = onConsumePendingCloudAuthUri
                     )
                 }

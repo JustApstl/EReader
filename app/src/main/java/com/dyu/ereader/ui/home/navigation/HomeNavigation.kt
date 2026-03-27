@@ -95,7 +95,6 @@ fun NavGraphBuilder.homeScreen(
             onInstallLatestUpdate = mainViewModel::installLatestUpdate,
             onToggleLatestChangelog = mainViewModel::toggleLatestReleaseDetails,
             onToggleReleaseHistory = mainViewModel::toggleReleaseHistory,
-            onPreviewUpdateState = mainViewModel::previewUpdateState,
             onExportAnnotations = homeViewModel::exportBookAnnotations,
             onCreateCollection = homeViewModel::createLibraryCollection,
             onToggleBookInCollection = homeViewModel::toggleBookInCollection,

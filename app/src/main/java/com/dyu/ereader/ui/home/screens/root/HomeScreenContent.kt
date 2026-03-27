@@ -112,7 +112,6 @@ internal fun HomeScreenContent(
     onInstallLatestUpdate: () -> Unit,
     onToggleLatestChangelog: () -> Unit,
     onToggleReleaseHistory: () -> Unit,
-    onPreviewUpdateState: () -> Unit,
     onConsumePendingCloudAuthUri: () -> Unit
 ) {
     when (currentTab) {
@@ -204,8 +203,7 @@ internal fun HomeScreenContent(
                     onCheckForUpdates = onCheckForUpdates,
                     onInstallLatestUpdate = onInstallLatestUpdate,
                     onToggleLatestChangelog = onToggleLatestChangelog,
-                    onToggleReleaseHistory = onToggleReleaseHistory,
-                    onPreviewUpdateState = onPreviewUpdateState
+                    onToggleReleaseHistory = onToggleReleaseHistory
                 ),
                 onConsumePendingCloudAuthUri = onConsumePendingCloudAuthUri
             )

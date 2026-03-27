@@ -95,8 +95,7 @@ data class SettingsEvents(
     val onCheckForUpdates: () -> Unit,
     val onInstallLatestUpdate: () -> Unit,
     val onToggleLatestChangelog: () -> Unit,
-    val onToggleReleaseHistory: () -> Unit,
-    val onPreviewUpdateState: () -> Unit
+    val onToggleReleaseHistory: () -> Unit
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -535,7 +534,6 @@ fun SettingsArea(
                     onInstallLatestUpdate = events.onInstallLatestUpdate,
                     onToggleLatestChangelog = events.onToggleLatestChangelog,
                     onToggleReleaseHistory = events.onToggleReleaseHistory,
-                    onPreviewUpdateState = events.onPreviewUpdateState,
                     onDeveloperMessage = { message ->
                         developerMessageJob?.cancel()
                         developerMessageJob = scope.launch {

@@ -779,7 +779,6 @@ internal fun AboutSection(
     onInstallLatestUpdate: () -> Unit,
     onToggleLatestChangelog: () -> Unit,
     onToggleReleaseHistory: () -> Unit,
-    onPreviewUpdateState: () -> Unit,
     onDeveloperMessage: (String) -> Unit,
     onShowLogs: () -> Unit
 ) {
@@ -973,9 +972,6 @@ internal fun AboutSection(
                         subtitle = "Browse earlier versions and open their release pages.",
                         onClick = onToggleReleaseHistory
                     )
-                    TextButton(onClick = onPreviewUpdateState, modifier = Modifier.align(Alignment.End)) {
-                        Text("Preview Update UI")
-                    }
                     if (updateUiState.showLatestReleaseDetails && updateUiState.latestRelease != null) {
                         val release = updateUiState.latestRelease
                         Surface(

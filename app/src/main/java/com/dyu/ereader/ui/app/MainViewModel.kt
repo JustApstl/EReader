@@ -333,45 +333,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun previewUpdateState() {
-        val baseRelease = _appUpdateState.value.latestRelease
-        val previewVersion = baseRelease?.versionName ?: CURRENT_VERSION_NAME
-        val previewRelease = com.dyu.ereader.data.model.update.AppReleaseInfo(
-            versionName = previewVersion,
-            tagName = baseRelease?.tagName ?: "v$previewVersion",
-            title = baseRelease?.title ?: "Version $previewVersion",
-            notes = baseRelease?.notes ?: "Preview release notes for testing the updater UI.\n\n- Refined update surfaces\n- Improved release history\n- Added in-app update notification testing",
-            htmlUrl = baseRelease?.htmlUrl ?: "https://github.com/JustApstl/EReader/releases",
-            downloadUrl = baseRelease?.downloadUrl,
-            assetName = baseRelease?.assetName ?: "EReader-preview.apk",
-            assetLabel = baseRelease?.assetLabel ?: "Preview Build",
-            publishedAt = baseRelease?.publishedAt ?: System.currentTimeMillis()
-        )
-        _appUpdateState.update { current ->
-            current.copy(
-                latestRelease = previewRelease,
-                releaseHistory = listOf(
-                    previewRelease,
-                    previewRelease.copy(
-                        versionName = CURRENT_VERSION_NAME,
-                        tagName = "v$CURRENT_VERSION_NAME",
-                        title = "Version $CURRENT_VERSION_NAME",
-                        notes = "Installed version preview notes.",
-                        publishedAt = System.currentTimeMillis() - 86400000L * 7
-                    )
-                ),
-                updateAvailable = true,
-                isPreparingInstall = false,
-                lastCheckedAt = System.currentTimeMillis(),
-                errorMessage = null,
-                showUpdatePrompt = false,
-                showLatestReleaseDetails = true,
-                isLoadingReleaseHistory = false,
-                showReleaseHistory = true
-            )
-        }
-    }
-
     fun dismissChangelogPrompt() {
         viewModelScope.launch {
             _appUpdateState.value.changelogRelease?.versionName?.let { versionName ->
