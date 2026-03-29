@@ -2,6 +2,16 @@
 
 EReader is an Android app for keeping your books in one place and reading them in a clean, customizable interface. It is designed for local reading first, with tools for organizing your library, adjusting the reading experience, and keeping track of your progress.
 
+## What's New
+
+- Refined the library, browse, and settings design for a cleaner Samsung-inspired look
+- Improved pull-to-refresh across the app with a more polished refresh indicator
+- Kept library search visible while scrolling for a better browsing experience
+- Reworked settings navigation with clearer top-level sections and better back navigation
+- Merged storage and backup areas inside app settings
+- Improved book actions, favorites, sort/layout controls, and collection management
+- Refined browse source cards and settings surfaces to remove distracting visual boxes
+
 ## What You Can Do
 
 - Import books from your device
