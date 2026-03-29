@@ -551,7 +551,7 @@ internal fun NotificationsSection(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Reading Reminder",
+                        text = "Reminders",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.ExtraBold
                     )
@@ -559,7 +559,7 @@ internal fun NotificationsSection(
                         text = if (permissionGranted) {
                             "Send gentle reminders so it is easier to come back and continue reading."
                         } else {
-                            "Allow notifications first so reading reminders can appear."
+                            "Allow notifications first so reminders can appear."
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -609,7 +609,7 @@ internal fun NotificationsSection(
             )
 
             SettingSwitch(
-                title = "Reading Reminder",
+                title = "Reminders",
                 desc = "Daily reminder to come back and continue reading.",
                 checked = uiState.display.notificationsEnabled && uiState.display.readingReminderEnabled,
                 onCheckedChange = { enabled ->
@@ -870,12 +870,7 @@ internal fun AboutSection(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    Text("App Updates", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
-                    Text(
-                        text = "Stay current with releases, install the newest build, and review what changed.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text("Updates", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                     PremiumUpdateHero(
                         status = when {
                             updateUiState.isChecking -> "Checking now"

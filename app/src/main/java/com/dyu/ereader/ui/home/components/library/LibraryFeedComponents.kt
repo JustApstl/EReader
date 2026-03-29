@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
+import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material3.DropdownMenu
@@ -33,6 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dyu.ereader.data.model.library.BookItem
+import com.dyu.ereader.ui.app.theme.UiTokens
+import com.dyu.ereader.ui.components.surfaces.SectionSurface
 import com.dyu.ereader.ui.home.state.LibraryLayout
 import com.dyu.ereader.ui.home.state.SortOrder
 
@@ -57,6 +61,7 @@ internal fun LibraryVolumesToolbar(
     } else {
         "Switch to grid layout"
     }
+    val currentSortLabel = sortOrder.label
 
     Row(
         modifier = Modifier
@@ -68,38 +73,28 @@ internal fun LibraryVolumesToolbar(
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
 
-        Surface(
-            onClick = onToggleLayout,
-            shape = RoundedCornerShape(8.dp),
-            color = activeIconContainer
-        ) {
-            Icon(
-                imageVector = nextLayoutIcon,
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ToolbarActionChip(
+                label = if (layout == LibraryLayout.GRID) "Grid" else "List",
+                icon = nextLayoutIcon,
                 contentDescription = nextLayoutLabel,
-                modifier = Modifier.padding(8.dp).size(18.dp),
-                tint = MaterialTheme.colorScheme.primary
+                containerColor = activeIconContainer,
+                onClick = onToggleLayout
             )
-        }
-
-        Box {
-            Surface(
-                onClick = { showSortMenu = true },
-                shape = RoundedCornerShape(10.dp),
-                color = Color.Transparent
-            ) {
-                Text(
-                    text = "SORT: ${shortSortLabel(sortOrder)}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
+            Box {
+                ToolbarActionChip(
+                    label = currentSortLabel,
+                    icon = Icons.AutoMirrored.Rounded.Sort,
+                    contentDescription = "Sort books. Current sort: $currentSortLabel",
+                    containerColor = activeIconContainer,
+                    onClick = { showSortMenu = true }
                 )
             }
             DropdownMenu(
@@ -129,6 +124,46 @@ internal fun LibraryVolumesToolbar(
 }
 
 @Composable
+private fun ToolbarActionChip(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: String,
+    containerColor: Color,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(18.dp),
+        color = containerColor,
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.18f)
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                modifier = Modifier.size(17.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
 internal fun LibraryFeedTabs(
     selectedTab: LibraryFeedTab,
     onTabSelected: (LibraryFeedTab) -> Unit,
@@ -141,12 +176,12 @@ internal fun LibraryFeedTabs(
     hasCollections: Boolean
 ) {
     val tabs = remember(allCount, recentCount, favoritesCount, collectionsCount, hasRecent, hasFavorites, hasCollections) {
-        buildList {
-            add(LibraryFeedTabUiState(LibraryFeedTab.ALL, allCount))
-            if (hasRecent) add(LibraryFeedTabUiState(LibraryFeedTab.RECENT, recentCount))
-            if (hasFavorites) add(LibraryFeedTabUiState(LibraryFeedTab.FAVORITES, favoritesCount))
-            if (hasCollections) add(LibraryFeedTabUiState(LibraryFeedTab.COLLECTIONS, collectionsCount))
-        }
+        listOfNotNull(
+            LibraryFeedTabUiState(LibraryFeedTab.ALL, allCount),
+            LibraryFeedTabUiState(LibraryFeedTab.RECENT, recentCount).takeIf { hasRecent },
+            LibraryFeedTabUiState(LibraryFeedTab.FAVORITES, favoritesCount).takeIf { hasFavorites },
+            LibraryFeedTabUiState(LibraryFeedTab.COLLECTIONS, collectionsCount).takeIf { hasCollections }
+        )
     }
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -161,24 +196,30 @@ internal fun LibraryFeedTabs(
                     .widthIn(min = 0.dp),
                 shape = RoundedCornerShape(20.dp),
                 color = if (selected) {
-                    MaterialTheme.colorScheme.secondaryContainer
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.84f)
                 } else {
-                    MaterialTheme.colorScheme.surfaceContainerLow
+                    MaterialTheme.colorScheme.surface.copy(alpha = 0.94f)
                 },
-                border = if (selected) null else androidx.compose.foundation.BorderStroke(
+                border = androidx.compose.foundation.BorderStroke(
                     1.dp,
-                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-                )
+                    if (selected) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                    } else {
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.36f)
+                    }
+                ),
+                shadowElevation = UiTokens.SectionShadowElevation
             ) {
-                Column(
+                Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = tabState.tab.label,
                         style = MaterialTheme.typography.labelLarge,
                         color = if (selected) {
-                            MaterialTheme.colorScheme.onSecondaryContainer
+                            MaterialTheme.colorScheme.onPrimaryContainer
                         } else {
                             MaterialTheme.colorScheme.onSurface
                         },
@@ -186,16 +227,27 @@ internal fun LibraryFeedTabs(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = tabState.count.toString(),
-                        style = MaterialTheme.typography.labelSmall,
+                    Surface(
+                        modifier = Modifier.padding(start = 8.dp),
+                        shape = CircleShape,
                         color = if (selected) {
-                            MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.75f)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                         } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        fontWeight = FontWeight.SemiBold
-                    )
+                            MaterialTheme.colorScheme.surfaceContainerHighest
+                        }
+                    ) {
+                        Text(
+                            text = tabState.count.toString(),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (selected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
@@ -217,13 +269,4 @@ internal fun sortLibraryTabBooks(books: List<BookItem>, sortOrder: SortOrder): L
         SortOrder.PROGRESS -> books.sortedByDescending { it.progress }
         SortOrder.FILE_SIZE -> books.sortedByDescending { it.fileSize }
     }
-}
-
-private fun shortSortLabel(sortOrder: SortOrder): String = when (sortOrder) {
-    SortOrder.TITLE -> "A-Z"
-    SortOrder.AUTHOR -> "AUTHOR"
-    SortOrder.DATE_ADDED -> "NEWEST"
-    SortOrder.LAST_OPENED -> "RECENT"
-    SortOrder.PROGRESS -> "PROGRESS"
-    SortOrder.FILE_SIZE -> "SIZE"
 }

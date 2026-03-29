@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.FilterAlt
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,100 +48,118 @@ internal fun HomeScreenHeader(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        Row(
+        val title = when (currentTab) {
+            0 -> "Library"
+            1 -> "Browse"
+            2 -> "Settings"
+            3 -> "Cloud Backup"
+            else -> "System Logs"
+        }
+        val subtitle = when (currentTab) {
+            0 -> "Your books, organized the One UI way."
+            1 -> "Discover new titles and curated catalogs."
+            2 -> "Tune the app to your reading style."
+            3 -> "Protect your reading life across devices."
+            else -> "Recent activity and troubleshooting details."
+        }
+        Surface(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.78f),
+            tonalElevation = 0.dp,
+            shadowElevation = 8.dp
         ) {
-            Column {
-                Text(
-                    text = when (currentTab) {
-                        0 -> "Library"
-                        1 -> "Browse"
-                        2 -> "Settings"
-                        3 -> "Cloud Backup"
-                        else -> "System Logs"
-                    },
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                if (currentTab == 0) {
-                    Text(
-                        text = "${uiState.visibleBooks.size} books available",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (currentTab == 0) {
-                    AppChromeIconButton(
-                        icon = Icons.Rounded.FilterAlt,
-                        contentDescription = "Filter",
-                        onClick = onShowFilter,
-                        selected = hasActiveFilters,
-                        liquidGlassEnabled = liquidGlassEnabled
-                    )
-                    AppChromeIconButton(
-                        icon = if (librarySearchVisible || uiState.searchQuery.isNotBlank()) {
-                            Icons.Rounded.Close
-                        } else {
-                            Icons.Rounded.Search
-                        },
-                        contentDescription = if (librarySearchVisible || uiState.searchQuery.isNotBlank()) {
-                            "Close library search"
-                        } else {
-                            "Search library"
-                        },
-                        onClick = {
-                            if (librarySearchVisible || uiState.searchQuery.isNotBlank()) {
-                                onLibrarySearchClear()
-                                onLibrarySearchVisibilityChange(false)
-                            } else {
-                                onLibrarySearchVisibilityChange(true)
-                                onFocusSearch()
-                            }
-                        },
-                        selected = librarySearchVisible || uiState.searchQuery.isNotBlank(),
-                        liquidGlassEnabled = liquidGlassEnabled
-                    )
-                } else if (currentTab == 1) {
-                    AppChromeIconButton(
-                        icon = if (browseSearchVisible) Icons.Rounded.Close else Icons.Rounded.Search,
-                        contentDescription = if (browseSearchVisible) "Close browse search" else "Search browse",
-                        onClick = {
-                            if (browseSearchVisible) {
-                                onBrowseSearchChanged("")
-                            }
-                            onBrowseSearchVisibilityChange(!browseSearchVisible)
-                        },
-                        selected = browseSearchVisible || browseSearchQuery.isNotBlank(),
-                        liquidGlassEnabled = liquidGlassEnabled
-                    )
-                } else if (currentTab == 4) {
-                    AppChromeIconButton(
-                        icon = Icons.Rounded.Delete,
-                        contentDescription = "Clear Logs",
-                        onClick = onClearLogs,
-                        destructive = true,
-                        liquidGlassEnabled = liquidGlassEnabled
-                    )
-                } else if (currentTab == 2) {
-                    AppChromeIconButton(
-                        icon = if (settingsSearchVisible) Icons.Rounded.Close else Icons.Rounded.Search,
-                        contentDescription = if (settingsSearchVisible) "Close settings search" else "Search settings",
-                        onClick = {
-                            if (settingsSearchVisible) {
-                                onSettingsSearchChanged("")
-                            }
-                            onSettingsSearchVisibilityChange(!settingsSearchVisible)
-                        },
-                        selected = settingsSearchVisible || settingsSearchQuery.isNotBlank(),
-                        liquidGlassEnabled = liquidGlassEnabled
-                    )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 18.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (currentTab == 0) {
+                            AppChromeIconButton(
+                                icon = Icons.Rounded.FilterAlt,
+                                contentDescription = "Filter",
+                                onClick = onShowFilter,
+                                selected = hasActiveFilters,
+                                liquidGlassEnabled = liquidGlassEnabled
+                            )
+                            AppChromeIconButton(
+                                icon = if (librarySearchVisible || uiState.searchQuery.isNotBlank()) {
+                                    Icons.Rounded.Close
+                                } else {
+                                    Icons.Rounded.Search
+                                },
+                                contentDescription = if (librarySearchVisible || uiState.searchQuery.isNotBlank()) {
+                                    "Close library search"
+                                } else {
+                                    "Search library"
+                                },
+                                onClick = {
+                                    if (librarySearchVisible || uiState.searchQuery.isNotBlank()) {
+                                        onLibrarySearchClear()
+                                        onLibrarySearchVisibilityChange(false)
+                                    } else {
+                                        onLibrarySearchVisibilityChange(true)
+                                        onFocusSearch()
+                                    }
+                                },
+                                selected = librarySearchVisible || uiState.searchQuery.isNotBlank(),
+                                liquidGlassEnabled = liquidGlassEnabled
+                            )
+                        } else if (currentTab == 1) {
+                            AppChromeIconButton(
+                                icon = if (browseSearchVisible) Icons.Rounded.Close else Icons.Rounded.Search,
+                                contentDescription = if (browseSearchVisible) "Close browse search" else "Search browse",
+                                onClick = {
+                                    if (browseSearchVisible) {
+                                        onBrowseSearchChanged("")
+                                    }
+                                    onBrowseSearchVisibilityChange(!browseSearchVisible)
+                                },
+                                selected = browseSearchVisible || browseSearchQuery.isNotBlank(),
+                                liquidGlassEnabled = liquidGlassEnabled
+                            )
+                        } else if (currentTab == 4) {
+                            AppChromeIconButton(
+                                icon = Icons.Rounded.Delete,
+                                contentDescription = "Clear Logs",
+                                onClick = onClearLogs,
+                                destructive = true,
+                                liquidGlassEnabled = liquidGlassEnabled
+                            )
+                        } else if (currentTab == 2) {
+                            AppChromeIconButton(
+                                icon = if (settingsSearchVisible) Icons.Rounded.Close else Icons.Rounded.Search,
+                                contentDescription = if (settingsSearchVisible) "Close settings search" else "Search settings",
+                                onClick = {
+                                    if (settingsSearchVisible) {
+                                        onSettingsSearchChanged("")
+                                    }
+                                    onSettingsSearchVisibilityChange(!settingsSearchVisible)
+                                },
+                                selected = settingsSearchVisible || settingsSearchQuery.isNotBlank(),
+                                liquidGlassEnabled = liquidGlassEnabled
+                            )
+                        }
+                    }
                 }
             }
         }

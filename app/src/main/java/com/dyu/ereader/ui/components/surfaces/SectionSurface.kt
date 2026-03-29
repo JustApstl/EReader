@@ -18,22 +18,41 @@ import com.dyu.ereader.ui.app.theme.UiTokens
 @Composable
 fun SectionSurface(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.surfaceContainerLow,
+    color: Color = MaterialTheme.colorScheme.surface,
     shape: Shape = UiTokens.SectionShape,
     border: BorderStroke? = null,
-    tonalElevation: Dp = 0.dp,
-    shadowElevation: Dp = 0.dp,
+    tonalElevation: Dp = UiTokens.SectionTonalElevation,
+    shadowElevation: Dp = UiTokens.SectionShadowElevation,
     contentPadding: PaddingValues = PaddingValues(UiTokens.SectionPadding),
+    onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Surface(
-        modifier = modifier,
-        shape = shape,
-        color = color,
-        border = border,
-        tonalElevation = tonalElevation,
-        shadowElevation = shadowElevation
-    ) {
-        Column(modifier = Modifier.padding(contentPadding), content = content)
+    val resolvedBorder = border ?: BorderStroke(
+        1.dp,
+        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+    )
+    if (onClick != null) {
+        Surface(
+            onClick = onClick,
+            modifier = modifier,
+            shape = shape,
+            color = color,
+            border = resolvedBorder,
+            tonalElevation = tonalElevation,
+            shadowElevation = shadowElevation
+        ) {
+            Column(modifier = Modifier.padding(contentPadding), content = content)
+        }
+    } else {
+        Surface(
+            modifier = modifier,
+            shape = shape,
+            color = color,
+            border = resolvedBorder,
+            tonalElevation = tonalElevation,
+            shadowElevation = shadowElevation
+        ) {
+            Column(modifier = Modifier.padding(contentPadding), content = content)
+        }
     }
 }

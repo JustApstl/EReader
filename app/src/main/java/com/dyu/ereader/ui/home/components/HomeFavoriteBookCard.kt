@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dyu.ereader.data.model.library.BookItem
+import com.dyu.ereader.ui.app.theme.UiTokens
 import com.dyu.ereader.ui.components.buttons.AppChromeIconButton
 import com.dyu.ereader.ui.components.surfaces.LiquidGlassOverlay
 import com.dyu.ereader.ui.components.surfaces.rememberLiquidGlassStyle
@@ -47,16 +48,18 @@ fun FavoriteBookCard(
 ) {
     val coverBitmap = remember(book.id) { book.coverImage?.let { BitmapFactory.decodeByteArray(it, 0, it.size)?.asImageBitmap() } }
     val glassStyle = rememberLiquidGlassStyle()
-    val cardColor = if (liquidGlassEnabled) glassStyle.containerColor else MaterialTheme.colorScheme.surfaceContainerLow
-    val cardBorder = if (liquidGlassEnabled) glassStyle.border else null
+    val cardShape = UiTokens.CardShape
+    val cardColor = if (liquidGlassEnabled) glassStyle.containerColor else MaterialTheme.colorScheme.surface.copy(alpha = 0.98f)
+    val cardBorder = if (liquidGlassEnabled) glassStyle.border else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.28f))
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Card(
             onClick = onClick,
             modifier = modifier.aspectRatio(0.72f),
-            shape = RoundedCornerShape(12.dp),
+            shape = cardShape,
             colors = CardDefaults.cardColors(containerColor = cardColor),
-            border = cardBorder
+            border = cardBorder,
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 if (coverBitmap != null) {
@@ -84,7 +87,7 @@ fun FavoriteBookCard(
 
                 if (liquidGlassEnabled) {
                     LiquidGlassOverlay(
-                        shape = RoundedCornerShape(12.dp),
+                        shape = cardShape,
                         intensity = if (coverBitmap != null) 0.5f else 0.95f
                     )
                 }
@@ -98,22 +101,22 @@ fun FavoriteBookCard(
                         icon = Icons.Rounded.MoreVert,
                         contentDescription = "Options",
                         onClick = { onShowActions(book) },
-                        size = 30.dp,
+                        size = 28.dp,
                         iconSize = 16.dp
                     )
                 }
             }
         }
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(8.dp))
         Text(
             text = book.title,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.ExtraBold,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
-                .width(130.dp)
-                .padding(horizontal = 4.dp)
+                .width(132.dp)
+                .padding(horizontal = 6.dp)
                 .align(Alignment.Start),
             textAlign = TextAlign.Start,
             color = if (liquidGlassEnabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.94f) else MaterialTheme.colorScheme.onSurface
@@ -124,8 +127,8 @@ fun FavoriteBookCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
-                .width(130.dp)
-                .padding(horizontal = 4.dp)
+                .width(132.dp)
+                .padding(horizontal = 6.dp)
                 .align(Alignment.Start),
             textAlign = TextAlign.Start,
             color = if (liquidGlassEnabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f) else MaterialTheme.colorScheme.onSurfaceVariant

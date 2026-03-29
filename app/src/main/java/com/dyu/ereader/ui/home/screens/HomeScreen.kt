@@ -302,34 +302,45 @@ fun HomeScreen(
     )
 
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        if (liquidGlassEnabled) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.background,
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
-                                MaterialTheme.colorScheme.background
-                            )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+                            MaterialTheme.colorScheme.background
                         )
                     )
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                                Color.Transparent
-                            ),
-                            radius = 900f
-                        )
+                )
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = if (liquidGlassEnabled) 0.24f else 0.14f),
+                            Color.Transparent
+                        ),
+                        radius = 820f
                     )
-            )
-        }
+                )
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.tertiary.copy(alpha = if (liquidGlassEnabled) 0.18f else 0.08f),
+                            Color.Transparent
+                        ),
+                        radius = 620f
+                    )
+                )
+        )
 
         LaunchedEffect(hideBetaFeatures) {
         if (hideBetaFeatures && currentTab == HomeRootTab.BROWSE) {

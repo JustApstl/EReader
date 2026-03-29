@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.dyu.ereader.data.model.app.AppTheme
 import com.dyu.ereader.data.model.library.BookType
 import com.dyu.ereader.data.model.library.BookItem
+import com.dyu.ereader.ui.app.theme.UiTokens
 import com.dyu.ereader.ui.components.buttons.AppChromeIconButton
 import com.dyu.ereader.ui.components.surfaces.LiquidGlassOverlay
 import com.dyu.ereader.ui.components.surfaces.rememberLiquidGlassStyle
@@ -75,23 +77,28 @@ fun BookCard(
     }
 
     val glassStyle = rememberLiquidGlassStyle()
-    val cardBgColor = if (liquidGlassEnabled) glassStyle.containerColor else MaterialTheme.colorScheme.surfaceContainerLow
-    val borderStroke = if (liquidGlassEnabled) glassStyle.border else null
-    val coverOverlay = MaterialTheme.colorScheme.scrim.copy(alpha = 0.34f)
+    val cardShape = UiTokens.CardShape
+    val cardBgColor = if (liquidGlassEnabled) glassStyle.containerColor else MaterialTheme.colorScheme.surface.copy(alpha = 0.98f)
+    val borderStroke = if (liquidGlassEnabled) {
+        glassStyle.border
+    } else {
+        BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.28f))
+    }
+    val coverOverlay = MaterialTheme.colorScheme.scrim.copy(alpha = 0.24f)
     val progressBadgeContainer = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.92f)
     val progressBadgeContent = MaterialTheme.colorScheme.onSurface
 
     val titleFontSize = when(gridColumns) {
-        2 -> 14.sp
-        3 -> 12.sp
+        2 -> 13.sp
+        3 -> 11.sp
         4 -> 10.sp
-        else -> 12.sp
+        else -> 11.sp
     }
     val authorFontSize = when(gridColumns) {
-        2 -> 12.sp
-        3 -> 10.sp
+        2 -> 11.sp
+        3 -> 9.sp
         4 -> 8.sp
-        else -> 10.sp
+        else -> 9.sp
     }
     val titleMarqueeModifier = marqueeModifier(titleMarqueeEnabled, book.title.length)
     val authorMarqueeModifier = marqueeModifier(authorMarqueeEnabled, book.author.length)
@@ -105,7 +112,7 @@ fun BookCard(
 
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(cardShape)
             .clickable(onClick = onClick)
             .padding(bottom = 4.dp)
     ) {
@@ -114,20 +121,20 @@ fun BookCard(
                 .fillMaxWidth()
                 .aspectRatio(0.72f)
                 .shadow(
-                    elevation = if (liquidGlassEnabled) 2.dp else 4.dp,
-                    shape = RoundedCornerShape(16.dp),
+                    elevation = if (liquidGlassEnabled) 2.dp else 10.dp,
+                    shape = cardShape,
                     clip = false
                 ),
-            shape = RoundedCornerShape(16.dp),
+            shape = cardShape,
             colors = CardDefaults.cardColors(containerColor = cardBgColor),
             border = borderStroke
         ) {
-            Box(modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp))) {
+            Box(modifier = Modifier.fillMaxSize().clip(cardShape)) {
                 if (coverBitmap != null) {
                     Image(
                         bitmap = coverBitmap,
                         contentDescription = "${book.title} cover",
-                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp)),
+                        modifier = Modifier.fillMaxSize().clip(cardShape),
                         contentScale = ContentScale.Crop
                     )
                 } else {
@@ -140,7 +147,7 @@ fun BookCard(
                     Box(
                         Modifier
                             .fillMaxSize()
-                            .clip(RoundedCornerShape(16.dp))
+                            .clip(cardShape)
                             .background(placeholderBrush),
                         contentAlignment = Alignment.Center
                     ) {
@@ -155,7 +162,7 @@ fun BookCard(
 
                 if (liquidGlassEnabled) {
                     LiquidGlassOverlay(
-                        shape = RoundedCornerShape(16.dp),
+                        shape = cardShape,
                         intensity = if (coverBitmap != null) 0.55f else 1f
                     )
                 }
@@ -245,30 +252,16 @@ fun BookCard(
                     }
                 }
 
-                Box(
+                BookActionDock(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(4.dp)
-                ) {
-                    AppChromeIconButton(
-                        icon = Icons.Rounded.MoreVert,
-                        contentDescription = "Options",
-                        onClick = { onShowActions(book) },
-                        size = 32.dp,
-                        iconSize = 17.dp
-                    )
-                }
-
-                if (showFavoriteButton) {
-                    FavoriteButton(
-                        isFavorite = book.isFavorite,
-                        onToggle = { onToggleFavorite(book.id, !book.isFavorite) },
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(4.dp),
-                        isLiquidGlass = liquidGlassEnabled
-                    )
-                }
+                        .padding(6.dp),
+                    isFavorite = book.isFavorite,
+                    showFavoriteButton = showFavoriteButton,
+                    onToggleFavorite = { onToggleFavorite(book.id, !book.isFavorite) },
+                    onShowActions = { onShowActions(book) },
+                    isLiquidGlass = liquidGlassEnabled
+                )
 
                 if (showProgress && book.progress > 0) {
                     Column(
@@ -305,32 +298,35 @@ fun BookCard(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = book.title,
-            style = MaterialTheme.typography.titleSmall.copy(
-                fontSize = titleFontSize, 
-                lineHeight = titleFontSize * 1.3,
-                fontWeight = FontWeight.Bold
-            ),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = if (titleMarqueeEnabled) 1 else 2,
-            overflow = if (titleMarqueeEnabled) TextOverflow.Clip else TextOverflow.Ellipsis,
+        Column(
             modifier = Modifier
-                .padding(horizontal = 4.dp)
-                .then(titleMarqueeModifier)
-        )
-        Text(
-            text = book.author,
-            style = MaterialTheme.typography.bodySmall.copy(
-                fontSize = authorFontSize,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-            ),
-            maxLines = 1,
-            overflow = if (authorMarqueeEnabled) TextOverflow.Clip else TextOverflow.Ellipsis,
-            modifier = Modifier
-                .padding(horizontal = 4.dp)
-                .then(authorMarqueeModifier)
-        )
+                .fillMaxWidth()
+                .padding(horizontal = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = book.title,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontSize = titleFontSize,
+                    lineHeight = titleFontSize * 1.25,
+                    fontWeight = FontWeight.ExtraBold
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = if (titleMarqueeEnabled) 1 else 2,
+                overflow = if (titleMarqueeEnabled) TextOverflow.Clip else TextOverflow.Ellipsis,
+                modifier = titleMarqueeModifier
+            )
+            Text(
+                text = book.author,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = authorFontSize,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.82f)
+                ),
+                maxLines = 1,
+                overflow = if (authorMarqueeEnabled) TextOverflow.Clip else TextOverflow.Ellipsis,
+                modifier = authorMarqueeModifier
+            )
+        }
     }
 }
 
@@ -380,10 +376,10 @@ fun BookListItem(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
+        shape = UiTokens.CardShape,
         color = bgColor,
         border = borderStroke,
-        shadowElevation = 0.dp
+        shadowElevation = UiTokens.SectionShadowElevation
     ) {
         Row(
             modifier = Modifier
@@ -394,20 +390,21 @@ fun BookListItem(
             Surface(
                 modifier = Modifier
                     .size(width = 64.dp, height = 88.dp)
-                    .shadow(4.dp, RoundedCornerShape(8.dp)),
-                shape = RoundedCornerShape(8.dp),
+                    .shadow(6.dp, RoundedCornerShape(14.dp)),
+                shape = RoundedCornerShape(14.dp),
                 color = if (liquidGlassEnabled) {
                     MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
                 } else {
                     MaterialTheme.colorScheme.surfaceContainerLow
-                }
+                },
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f))
             ) {
-                Box(modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
                     if (coverBitmap != null) {
                         Image(
                             bitmap = coverBitmap,
                             contentDescription = null,
-                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
+                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(14.dp)),
                             contentScale = ContentScale.Crop
                         )
                     } else {
@@ -429,7 +426,7 @@ fun BookListItem(
 
                     if (liquidGlassEnabled) {
                         LiquidGlassOverlay(
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(14.dp),
                             intensity = if (coverBitmap != null) 0.45f else 0.95f
                         )
                     }
@@ -523,28 +520,77 @@ fun BookListItem(
                 }
             }
             
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (showFavoriteButton) {
-                    FavoriteButton(
-                        isFavorite = book.isFavorite,
-                        onToggle = { onToggleFavorite(book.id, !book.isFavorite) },
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        isLiquidGlass = liquidGlassEnabled
-                    )
-                }
-
-                Box {
-                    AppChromeIconButton(
-                        icon = Icons.Rounded.MoreVert,
-                        contentDescription = "More",
-                        onClick = { onShowActions(book) },
-                        size = 32.dp,
-                        iconSize = 17.dp
-                    )
-                }
-            }
+            BookActionDock(
+                isFavorite = book.isFavorite,
+                showFavoriteButton = showFavoriteButton,
+                onToggleFavorite = { onToggleFavorite(book.id, !book.isFavorite) },
+                onShowActions = { onShowActions(book) },
+                isLiquidGlass = liquidGlassEnabled
+            )
         }
     }
+}
+
+@Composable
+private fun BookActionDock(
+    isFavorite: Boolean,
+    showFavoriteButton: Boolean,
+    onToggleFavorite: () -> Unit,
+    onShowActions: () -> Unit,
+    isLiquidGlass: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        color = if (isLiquidGlass) {
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+        } else {
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+        },
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)),
+        shadowElevation = 8.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            if (showFavoriteButton) {
+                BookOverlayActionButton(
+                    icon = if (isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                    contentDescription = "Favorite",
+                    onClick = onToggleFavorite,
+                    selected = isFavorite,
+                    destructive = isFavorite
+                )
+            }
+            BookOverlayActionButton(
+                icon = Icons.Rounded.MoreVert,
+                contentDescription = "More",
+                onClick = onShowActions
+            )
+        }
+    }
+}
+
+@Composable
+private fun BookOverlayActionButton(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    selected: Boolean = false,
+    destructive: Boolean = false
+) {
+    AppChromeIconButton(
+        icon = icon,
+        contentDescription = contentDescription,
+        onClick = onClick,
+        selected = selected,
+        destructive = destructive,
+        size = 30.dp,
+        iconSize = 16.dp
+    )
 }
 
 @Composable

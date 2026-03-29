@@ -58,7 +58,7 @@ class ReadingReminderRepository @Inject constructor(
         NotificationManagerCompat.from(context).notify(
             TEST_NOTIFICATION_ID,
             buildNotification(
-                title = "Reading reminder",
+                title = "Reminder",
                 message = "Pick up where you left off and continue your current book."
             )
         )
@@ -129,7 +129,7 @@ class ReadingReminderRepository @Inject constructor(
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Reading reminders",
+            "Reminders",
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
             description = "Reminders to return and continue reading."

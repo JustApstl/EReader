@@ -1,135 +1,78 @@
 # EReader
 
-Android e-reader built with Kotlin, Jetpack Compose, Material 3, Room, DataStore, Hilt, `epub.js`, native PDF rendering, and MOBI conversion support.
+EReader is an Android app for keeping your books in one place and reading them in a clean, customizable interface. It is designed for local reading first, with tools for organizing your library, adjusting the reading experience, and keeping track of your progress.
 
-## Current State
+## What You Can Do
 
-- Multi-format library with EPUB, EPUB3, PDF, AZW3, MOBI, CBZ, and CBR recognition
-- EPUB is the most complete in-app reading path
-- PDF uses native `PdfRenderer`
-- MOBI converts to EPUB before reading
-- AZW3 is recognized but still unsupported for in-app reading
-- CBZ and CBR are recognized/importable but do not yet have a comic reader
-- Local backup/export is the primary dependable backup flow today
-- Cloud backup UI is present, but only WebDAV is currently practical without extra provider registration
+- Import books from your device
+- Build a personal library with favorites and collections
+- Read supported books inside the app
+- Keep your place automatically
+- Highlight text, add bookmarks, and save notes
+- Search inside EPUB books
+- Change fonts, spacing, margins, themes, and page style
+- Use text-to-speech listening controls
+- Browse and download books from supported OPDS catalogs
 
-## Project Structure
+## Supported Formats
 
-- `app/src/main/java/com/dyu/ereader/core`
-  - Core helpers for codec, crypto, locale, logging, and networking
-- `app/src/main/java/com/dyu/ereader/data`
-  - Format handlers, local persistence, models, repositories
-- `app/src/main/java/com/dyu/ereader/di`
-  - Hilt modules
-- `app/src/main/java/com/dyu/ereader/ui/app`
-  - App entry, nav host, theming
-- `app/src/main/java/com/dyu/ereader/ui/home`
-  - Library, browse, settings, logs, and home view model
-- `app/src/main/java/com/dyu/ereader/ui/browse`
-  - OPDS catalog/feed UI
-- `app/src/main/java/com/dyu/ereader/ui/reader`
-  - Reader screens, chrome, overlays, settings, formats, and reader view model
-- `app/src/main/java/com/dyu/ereader/ui/components`
-  - Shared Compose components
+- `EPUB` and `EPUB3`
+  Best supported reading experience in the app
+- `PDF`
+  Read inside the app with page and scroll modes
+- `MOBI`
+  Imported and converted for reading when possible
+- `AZW3`
+  Recognized in the library, but in-app reading is not ready yet
+- `CBZ` and `CBR`
+  Recognized and importable, but a comic reader is not available yet
 
-For a more useful structure guide, see [docs/FILE_MAP.md](/home/dyu/Project/docs/FILE_MAP.md).
+## How It Works
 
-## Important Entry Points
+After adding books from your phone or tablet, EReader scans them into your library so you can browse, filter, and open them quickly. When you start reading, the app remembers your progress and lets you adjust the layout to match your comfort, whether you prefer larger text, different spacing, or a different page style.
 
-- `app/src/main/java/com/dyu/ereader/ui/app/MainActivity.kt`
-- `app/src/main/java/com/dyu/ereader/ui/app/AppNavHost.kt`
-- `app/src/main/java/com/dyu/ereader/ui/home/screens/HomeScreen.kt`
-- `app/src/main/java/com/dyu/ereader/ui/home/settings/SettingsScreen.kt`
-- `app/src/main/java/com/dyu/ereader/ui/reader/screens/ReaderScreen.kt`
-- `app/src/main/java/com/dyu/ereader/ui/reader/screens/ReaderScreenFormatContent.kt`
-- `app/src/main/java/com/dyu/ereader/data/repository/library/LibraryRepository.kt`
-- `app/src/main/java/com/dyu/ereader/data/repository/reader/ReaderRepository.kt`
-
-## Reading Features
-
-- EPUB reader via WebView + `epub.js`
-- Native PDF screen with page and scroll modes
-- Reader progress tracking and last-opened state
-- Highlights, bookmarks, margin notes, and export
-- Search inside EPUB content
-- Reader appearance customization:
-  - background
-  - font
-  - font size
-  - line spacing
-  - margins
-  - alignment
-  - page transition style
-- Listen / TTS controls
-- Reader settings preview inside App Settings
+For EPUB books, you can search the text, make highlights, save notes, and use listening controls. PDF reading is also supported inside the app, including different viewing modes for easier reading.
 
 ## Library Features
 
-- SAF-based library folder access
-- Format registry-driven scanning/import
-- Grid/list layouts
-- Filtering by:
-  - type
-  - genre
-  - language
-  - year
-  - country
-  - reading status
-- Favorites and collections
-- OPDS browse + download import pipeline
+- Grid and list layouts
+- Filters for book type, genre, language, year, country, and reading status
+- Favorites
+- Collections
+- Recent reading tracking
 
-## Settings
+## Reader Features
 
-- App theme defaults to `System`
-- Material 3 theme cleanup is in progress across the whole app
-- App appearance and reader defaults are separated
-- Notifications menu exists for reminder-related controls
-- Backup is split between local backup/export flows and in-progress cloud backup UI
+- Progress saving
+- Highlights
+- Bookmarks
+- Notes
+- Search inside EPUB
+- Reader appearance controls
+- Text-to-speech controls
 
 ## Backup
 
-### Local Backup
+- Local export and import is the main backup option
+- Backup is intended to cover your reading-related data such as settings, bookmarks, notes, and highlights
+- Cloud backup is still in progress
+- WebDAV is the most practical cloud option right now
 
-- Export/import is the main reliable backup path right now
-- Intended backup content includes:
-  - app settings
-  - reader settings
-  - bookmarks
-  - notes
-  - highlights
+## Getting Started
 
-### Cloud Backup
+1. Install the app on your Android device.
+2. Open EReader and allow file or folder access when needed.
+3. Add books from your device or browse supported catalogs.
+4. Tap a book in your library to start reading.
+5. Open the reader menu to change appearance, manage notes, search, or use listening features.
 
-- WebDAV is the only provider path that does not depend on provider app registration
-- Dropbox and Google Drive are visible in the UI but intentionally disabled until provider registration/OAuth setup is ready
-- Cloud backup code is still under cleanup and should be treated as in-progress
+## Current Limitations
 
-## Theming Direction
+- EPUB is the most complete reading format today
+- AZW3 is not yet supported for in-app reading
+- CBZ and CBR do not yet have a comic reader
+- Some cloud backup options shown in the app are still unfinished
 
-The current cleanup direction is:
+## Android Support
 
-- Material 3 first
-- fewer custom boxed surfaces
-- less OLED-specific branching in shared UI
-- stronger alignment between Library, Browse, Reader, and Settings
-- system-based theme/accent behavior where possible
-
-## Build
-
-```bash
-./gradlew :app:compileDebugKotlin
-./gradlew assembleDebug
-```
-
-## Recommended Validation
-
-- Open an EPUB and a PDF and verify reader settings still apply
-- Check Library grid/list, filtering, and recent reading surfaces
-- Verify Settings search and navigation flows
-- Export and import a local backup
-- Test browse download -> import -> read flow
-
-## Docs
-
-- [docs/FILE_MAP.md](/home/dyu/Project/docs/FILE_MAP.md)
-- [docs/TECHNICAL_SUMMARY.md](/home/dyu/Project/docs/TECHNICAL_SUMMARY.md)
+EReader is built for Android devices running Android 7.0 and above.

@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -49,6 +49,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dyu.ereader.ui.components.buttons.AppChromeIconButton
+import com.dyu.ereader.ui.app.theme.UiTokens
 import java.util.Locale
 
 @Composable
@@ -79,21 +80,24 @@ fun AppSearchBar(
             onSearch(spokenText)
         }
     }
+    val shape = RoundedCornerShape(22.dp)
     val backgroundLuminance = MaterialTheme.colorScheme.background.luminance()
     val isDarkTheme = backgroundLuminance < 0.45f
     val isOled = backgroundLuminance < 0.05f
     val searchTextStyle = MaterialTheme.typography.bodyMedium.copy(lineHeight = 20.sp)
     val borderColor = if (liquidGlassEnabled) {
-        MaterialTheme.colorScheme.outlineVariant.copy(alpha = if (isDarkTheme) 0.32f else 0.4f)
+        MaterialTheme.colorScheme.outlineVariant.copy(alpha = if (isDarkTheme) 0.28f else 0.34f)
     } else {
-        MaterialTheme.colorScheme.outlineVariant.copy(alpha = if (isDarkTheme) 0.38f else 0.5f)
+        MaterialTheme.colorScheme.primary.copy(alpha = if (isDarkTheme) 0.18f else 0.12f)
     }
     val containerColor = if (liquidGlassEnabled) {
         MaterialTheme.colorScheme.surface.copy(
             alpha = if (isOled) 0.72f else if (isDarkTheme) 0.76f else 0.88f
         )
     } else {
-        MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+        MaterialTheme.colorScheme.primaryContainer.copy(
+            alpha = if (isDarkTheme) 0.28f else 0.54f
+        )
     }
 
     LaunchedEffect(autoFocus) {
@@ -106,24 +110,25 @@ fun AppSearchBar(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp),
-        shape = CircleShape,
+            .height(56.dp),
+        shape = shape,
         color = containerColor,
-        border = BorderStroke(1.dp, borderColor)
+        border = BorderStroke(1.dp, borderColor),
+        shadowElevation = UiTokens.SectionShadowElevation
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
-                .padding(start = 14.dp, end = 8.dp),
+                .padding(start = 18.dp, end = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Icon(
                 imageVector = androidx.compose.material.icons.Icons.Rounded.Search,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(21.dp)
             )
 
             BasicTextField(
@@ -165,7 +170,7 @@ fun AppSearchBar(
                     contentDescription = "Clear",
                     onClick = { onQueryChange("") },
                     liquidGlassEnabled = liquidGlassEnabled,
-                    size = 24.dp,
+                    size = 28.dp,
                     iconSize = 14.dp
                 )
             } else {
@@ -192,8 +197,8 @@ fun AppSearchBar(
                             contentDescription = "Voice search"
                             role = Role.Button
                         },
-                    shape = CircleShape,
-                    color = Color.Transparent
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.58f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(

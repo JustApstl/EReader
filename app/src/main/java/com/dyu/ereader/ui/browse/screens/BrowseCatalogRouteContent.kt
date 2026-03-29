@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +38,7 @@ import com.dyu.ereader.ui.browse.components.BrowseCatalogHeader
 import com.dyu.ereader.ui.browse.components.CatalogList
 import com.dyu.ereader.ui.browse.components.ErrorState
 import com.dyu.ereader.ui.browse.components.FeedContent
+import com.dyu.ereader.ui.components.refresh.EReaderPullRefreshIndicator
 import com.dyu.ereader.ui.home.viewmodel.HomeViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -284,19 +284,17 @@ internal fun BrowseCatalogRouteContent(
                                 isRefreshingCatalogs = true
                                 viewModel.refreshBrowseCatalogHealth()
                                 scope.launch {
-                                    delay(700)
+                                    delay(850)
                                     isRefreshingCatalogs = false
                                 }
                             },
                             indicator = {
-                                PullToRefreshDefaults.Indicator(
+                                EReaderPullRefreshIndicator(
                                     state = pullState,
                                     isRefreshing = isRefreshingCatalogs,
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
-                                        .padding(top = 8.dp),
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    color = MaterialTheme.colorScheme.primary
+                                        .padding(top = 8.dp)
                                 )
                             }
                         ) {

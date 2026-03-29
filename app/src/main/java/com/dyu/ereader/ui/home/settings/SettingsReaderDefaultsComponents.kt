@@ -1,6 +1,7 @@
 package com.dyu.ereader.ui.home.settings
 
 import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -333,27 +334,32 @@ internal fun ReaderThemeButton(
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Box(
-            modifier = Modifier
-                .size(44.dp)
-                .background(previewColor, CircleShape)
-                .clickable(onClick = onClick)
-                .border(
+            modifier = Modifier.size(44.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                onClick = onClick,
+                modifier = Modifier.matchParentSize(),
+                shape = CircleShape,
+                color = previewColor,
+                border = BorderStroke(
                     width = if (isSelected) 3.dp else 1.dp,
                     color = if (isSelected) {
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                     } else {
                         MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f)
-                    },
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (isSelected) {
-                Icon(
-                    imageVector = Icons.Rounded.Check,
-                    contentDescription = null,
-                    tint = if (previewColor.luminance() > 0.55f) Color.Black else Color.White
+                    }
                 )
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    if (isSelected) {
+                        Icon(
+                            imageVector = Icons.Rounded.Check,
+                            contentDescription = null,
+                            tint = if (previewColor.luminance() > 0.55f) Color.Black else Color.White
+                        )
+                    }
+                }
             }
         }
         Text(

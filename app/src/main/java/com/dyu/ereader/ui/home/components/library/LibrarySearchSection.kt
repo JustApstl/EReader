@@ -16,6 +16,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -53,93 +54,97 @@ internal fun LibrarySearchSection(
 ) {
     val hasSearchOrAdvancedFilters = uiState.hasLibrarySearchOrFilters()
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp)
+    Surface(
+        color = MaterialTheme.colorScheme.background.copy(alpha = 0.98f)
     ) {
-        if (searchVisible || uiState.searchQuery.isNotBlank()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                AppSearchBar(
-                    query = uiState.searchQuery,
-                    placeholder = "Search Library",
-                    onQueryChange = onSearchChanged,
-                    onSearch = { _ -> },
-                    liquidGlassEnabled = liquidGlassEnabled,
-                    focusRequester = searchFocusRequester,
-                    autoFocus = searchVisible,
-                    modifier = Modifier.weight(1f)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 8.dp)
+        ) {
+            if (searchVisible || uiState.searchQuery.isNotBlank()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    AppSearchBar(
+                        query = uiState.searchQuery,
+                        placeholder = "Search Library",
+                        onQueryChange = onSearchChanged,
+                        onSearch = { _ -> },
+                        liquidGlassEnabled = liquidGlassEnabled,
+                        focusRequester = searchFocusRequester,
+                        autoFocus = searchVisible,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            if (!hasSearchOrAdvancedFilters) {
+                Spacer(Modifier.height(12.dp))
+                LibraryFeedTabs(
+                    selectedTab = selectedTab,
+                    onTabSelected = onTabSelected,
+                    allCount = allCount,
+                    recentCount = recentCount,
+                    favoritesCount = favoritesCount,
+                    collectionsCount = collectionsCount,
+                    hasRecent = hasRecent,
+                    hasFavorites = hasFavorites,
+                    hasCollections = hasCollections
                 )
             }
-        }
 
-        if (!hasSearchOrAdvancedFilters) {
-            Spacer(Modifier.height(12.dp))
-            LibraryFeedTabs(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                allCount = allCount,
-                recentCount = recentCount,
-                favoritesCount = favoritesCount,
-                collectionsCount = collectionsCount,
-                hasRecent = hasRecent,
-                hasFavorites = hasFavorites,
-                hasCollections = hasCollections
-            )
-        }
-
-        if (hasSearchOrAdvancedFilters) {
-            Spacer(Modifier.height(10.dp))
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                items(uiState.selectedGenres.toList()) { genre ->
-                    ActiveLibraryFilterChip(
-                        label = genre,
-                        onClick = { onToggleGenreFilter(genre) }
-                    )
-                }
-                items(uiState.selectedLanguages.toList()) { language ->
-                    ActiveLibraryFilterChip(
-                        label = displayLanguageName(language) ?: language,
-                        onClick = { onToggleLanguageFilter(language) }
-                    )
-                }
-                items(uiState.selectedYears.toList()) { year ->
-                    ActiveLibraryFilterChip(
-                        label = year,
-                        onClick = { onToggleYearFilter(year) }
-                    )
-                }
-                items(uiState.selectedCountries.toList()) { country ->
-                    ActiveLibraryFilterChip(
-                        label = country,
-                        onClick = { onToggleCountryFilter(country) }
-                    )
-                }
-                items(uiState.selectedTypes.toList()) { type ->
-                    ActiveLibraryFilterChip(
-                        label = type.label,
-                        onClick = { onToggleTypeFilter(type) }
-                    )
-                }
-                items(uiState.selectedStatuses.toList()) { status ->
-                    ActiveLibraryFilterChip(
-                        label = status.label,
-                        onClick = { onToggleReadingStatus(status) }
-                    )
-                }
-                if (uiState.searchQuery.isNotEmpty()) {
-                    item {
+            if (hasSearchOrAdvancedFilters) {
+                Spacer(Modifier.height(10.dp))
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    items(uiState.selectedGenres.toList()) { genre ->
                         ActiveLibraryFilterChip(
-                            label = "Query: ${uiState.searchQuery}",
-                            onClick = { onSearchChanged("") }
+                            label = genre,
+                            onClick = { onToggleGenreFilter(genre) }
                         )
+                    }
+                    items(uiState.selectedLanguages.toList()) { language ->
+                        ActiveLibraryFilterChip(
+                            label = displayLanguageName(language) ?: language,
+                            onClick = { onToggleLanguageFilter(language) }
+                        )
+                    }
+                    items(uiState.selectedYears.toList()) { year ->
+                        ActiveLibraryFilterChip(
+                            label = year,
+                            onClick = { onToggleYearFilter(year) }
+                        )
+                    }
+                    items(uiState.selectedCountries.toList()) { country ->
+                        ActiveLibraryFilterChip(
+                            label = country,
+                            onClick = { onToggleCountryFilter(country) }
+                        )
+                    }
+                    items(uiState.selectedTypes.toList()) { type ->
+                        ActiveLibraryFilterChip(
+                            label = type.label,
+                            onClick = { onToggleTypeFilter(type) }
+                        )
+                    }
+                    items(uiState.selectedStatuses.toList()) { status ->
+                        ActiveLibraryFilterChip(
+                            label = status.label,
+                            onClick = { onToggleReadingStatus(status) }
+                        )
+                    }
+                    if (uiState.searchQuery.isNotEmpty()) {
+                        item {
+                            ActiveLibraryFilterChip(
+                                label = "Query: ${uiState.searchQuery}",
+                                onClick = { onSearchChanged("") }
+                            )
+                        }
                     }
                 }
             }

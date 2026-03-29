@@ -8,7 +8,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -38,6 +37,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,6 +50,7 @@ import com.dyu.ereader.data.model.reader.ReaderControl
 import com.dyu.ereader.data.model.reader.ReaderSettings
 import com.dyu.ereader.data.model.update.AppUpdateUiState
 import com.dyu.ereader.ui.components.buttons.AppChromeIconButton
+import com.dyu.ereader.ui.components.surfaces.SectionSurface
 import com.dyu.ereader.ui.home.state.HomeUiState
 import kotlinx.coroutines.launch
 
@@ -150,7 +151,7 @@ fun SettingsArea(
     val showAppearanceSection = if (isSearching) normalizedSearchQuery.matchesSettingsSearch(
         "appearance", "theme", "font", "accent", "color", "oled", "dark", "light", "system",
         "text size", "text scale", "navigation", "navigation bar", "animations", "haptics", "beta",
-        "app appearance", "app font", "accent color", "oled mode", "system theme"
+        "app settings", "app font", "accent color", "oled mode", "system theme"
     ) else currentDestination == SettingsDestination.APP_APPEARANCE
     val showReaderDefaultsSection = if (isSearching) normalizedSearchQuery.matchesSettingsSearch(
         "reader", "reading", "page", "theme", "font size", "line spacing", "margin",
@@ -168,7 +169,7 @@ fun SettingsArea(
     val showBackupSection = if (isSearching) normalizedSearchQuery.matchesSettingsSearch(
         "backup", "data", "export", "import", "local backup", "restore", "storage bar",
         "last export", "last import", "backup file"
-    ) else currentDestination == SettingsDestination.BACKUP
+    ) else currentDestination == SettingsDestination.STORAGE_BACKUP
     val showNotificationsSection = if (isSearching) normalizedSearchQuery.matchesSettingsSearch(
         "notifications", "reminder", "reading reminder", "alerts", "test notification",
         "permission", "push", "daily reminder", "update notifications", "app updates"
@@ -176,7 +177,7 @@ fun SettingsArea(
     val showStorageSection = if (isSearching) normalizedSearchQuery.matchesSettingsSearch(
         "storage", "folder", "library access", "revoke", "manage", "location", "relocate",
         "disconnect", "permission"
-    ) else currentDestination == SettingsDestination.STORAGE
+    ) else currentDestination == SettingsDestination.STORAGE_BACKUP
     val showAboutSection = if (isSearching) normalizedSearchQuery.matchesSettingsSearch(
         "about", "version", "logs", "developer", "haptics", "beta", "debug", "troubleshooting",
         "update", "updates", "release", "changelog", "github"
@@ -203,7 +204,7 @@ fun SettingsArea(
             if (showAppearanceSection) {
                 add(
                     SearchResultGroup(
-                        title = "App Appearance",
+                        title = "App Settings",
                         description = "Theme, font, accent color, and navigation style.",
                         icon = Icons.Rounded.Palette
                     )
@@ -236,12 +237,12 @@ fun SettingsArea(
                     )
                 )
             }
-            if (showBackupSection) {
+            if (showBackupSection || showStorageSection) {
                 add(
                     SearchResultGroup(
-                        title = "Backup",
-                        description = "Local backup, restore, storage usage, and recent activity.",
-                        icon = Icons.Rounded.CloudSync
+                        title = "Storage & Backup",
+                        description = "Library folder location, local backup, restore, and device storage.",
+                        icon = Icons.Rounded.Storage
                     )
                 )
             }
@@ -249,17 +250,8 @@ fun SettingsArea(
                 add(
                     SearchResultGroup(
                         title = "Notifications",
-                        description = "Reading reminders, permissions, and test alerts.",
+                        description = "Reminders, permissions, and test alerts.",
                         icon = Icons.Rounded.Notifications
-                    )
-                )
-            }
-            if (showStorageSection) {
-                add(
-                    SearchResultGroup(
-                        title = "Storage",
-                        description = "Library folder location, access, and device storage.",
-                        icon = Icons.Rounded.Storage
                     )
                 )
             }
@@ -360,10 +352,10 @@ fun SettingsArea(
                         SettingsMainButtons(
                             onSelected = { section ->
                                 currentDestination = when (section) {
-                                    SettingsMainSection.APPEARANCE -> SettingsDestination.APPEARANCE_MENU
+                                    SettingsMainSection.APP_SETTINGS -> SettingsDestination.APP_APPEARANCE
+                                    SettingsMainSection.READER -> SettingsDestination.READER_APPEARANCE
                                     SettingsMainSection.LIBRARY -> SettingsDestination.LIBRARY
-                                    SettingsMainSection.STORAGE -> SettingsDestination.STORAGE
-                                    SettingsMainSection.BACKUP -> SettingsDestination.BACKUP
+                                    SettingsMainSection.STORAGE_BACKUP -> SettingsDestination.STORAGE_BACKUP
                                     SettingsMainSection.NOTIFICATIONS -> SettingsDestination.NOTIFICATIONS
                                     SettingsMainSection.ABOUT -> SettingsDestination.ABOUT
                                 }
@@ -371,64 +363,45 @@ fun SettingsArea(
                         )
                     }
 
-                    SettingsDestination.APPEARANCE_MENU -> {
-                        SettingsNavigationHeader(
-                            title = "Appearance",
-                            description = "Choose which appearance settings you want to open.",
-                            onBack = { currentDestination = SettingsDestination.ROOT }
-                        )
-                        AppearanceModeButtons(
-                            onSelected = { target ->
-                                currentDestination = when (target) {
-                                    AppearanceSectionTarget.APP -> SettingsDestination.APP_APPEARANCE
-                                    AppearanceSectionTarget.READER -> SettingsDestination.READER_APPEARANCE
-                                }
-                            }
-                        )
-                    }
-
                     SettingsDestination.APP_APPEARANCE -> {
                         SettingsNavigationHeader(
-                            title = "App Appearance",
-                            description = AppearanceSectionTarget.APP.description,
-                            onBack = { currentDestination = SettingsDestination.APPEARANCE_MENU }
+                            backLabel = "Settings",
+                            title = "App Settings",
+                            description = "Theme, font, color, and navigation.",
+                            onBack = { currentDestination = SettingsDestination.ROOT }
                         )
                     }
 
                     SettingsDestination.READER_APPEARANCE -> {
                         SettingsNavigationHeader(
-                            title = "Reader Appearance",
-                            description = AppearanceSectionTarget.READER.description,
-                            onBack = { currentDestination = SettingsDestination.APPEARANCE_MENU }
+                            backLabel = "Settings",
+                            title = "Reader",
+                            description = "Background, layout, type, and controls.",
+                            onBack = { currentDestination = SettingsDestination.ROOT }
                         )
                     }
 
                     SettingsDestination.LIBRARY -> {
                         SettingsNavigationHeader(
+                            backLabel = "Settings",
                             title = SettingsMainSection.LIBRARY.label,
                             description = SettingsMainSection.LIBRARY.description,
                             onBack = { currentDestination = SettingsDestination.ROOT }
                         )
                     }
 
-                    SettingsDestination.STORAGE -> {
+                    SettingsDestination.STORAGE_BACKUP -> {
                         SettingsNavigationHeader(
-                            title = SettingsMainSection.STORAGE.label,
-                            description = SettingsMainSection.STORAGE.description,
-                            onBack = { currentDestination = SettingsDestination.ROOT }
-                        )
-                    }
-
-                    SettingsDestination.BACKUP -> {
-                        SettingsNavigationHeader(
-                            title = SettingsMainSection.BACKUP.label,
-                            description = SettingsMainSection.BACKUP.description,
+                            backLabel = "Settings",
+                            title = SettingsMainSection.STORAGE_BACKUP.label,
+                            description = SettingsMainSection.STORAGE_BACKUP.description,
                             onBack = { currentDestination = SettingsDestination.ROOT }
                         )
                     }
 
                     SettingsDestination.NOTIFICATIONS -> {
                         SettingsNavigationHeader(
+                            backLabel = "Settings",
                             title = SettingsMainSection.NOTIFICATIONS.label,
                             description = SettingsMainSection.NOTIFICATIONS.description,
                             onBack = { currentDestination = SettingsDestination.ROOT }
@@ -437,6 +410,7 @@ fun SettingsArea(
 
                     SettingsDestination.ABOUT -> {
                         SettingsNavigationHeader(
+                            backLabel = "Settings",
                             title = SettingsMainSection.ABOUT.label,
                             description = SettingsMainSection.ABOUT.description,
                             onBack = { currentDestination = SettingsDestination.ROOT }
@@ -595,24 +569,20 @@ private data class SearchResultGroup(
 
 private enum class SettingsDestination {
     ROOT,
-    APPEARANCE_MENU,
     APP_APPEARANCE,
     READER_APPEARANCE,
     LIBRARY,
-    STORAGE,
-    BACKUP,
+    STORAGE_BACKUP,
     NOTIFICATIONS,
     ABOUT
 }
 
 private fun SettingsDestination.backDestination(): SettingsDestination = when (this) {
     SettingsDestination.ROOT -> SettingsDestination.ROOT
-    SettingsDestination.APPEARANCE_MENU -> SettingsDestination.ROOT
-    SettingsDestination.APP_APPEARANCE -> SettingsDestination.APPEARANCE_MENU
-    SettingsDestination.READER_APPEARANCE -> SettingsDestination.APPEARANCE_MENU
+    SettingsDestination.APP_APPEARANCE -> SettingsDestination.ROOT
+    SettingsDestination.READER_APPEARANCE -> SettingsDestination.ROOT
     SettingsDestination.LIBRARY -> SettingsDestination.ROOT
-    SettingsDestination.STORAGE -> SettingsDestination.ROOT
-    SettingsDestination.BACKUP -> SettingsDestination.ROOT
+    SettingsDestination.STORAGE_BACKUP -> SettingsDestination.ROOT
     SettingsDestination.NOTIFICATIONS -> SettingsDestination.ROOT
     SettingsDestination.ABOUT -> SettingsDestination.ROOT
 }
@@ -622,29 +592,29 @@ private enum class SettingsMainSection(
     val description: String,
     val icon: ImageVector
 ) {
-    APPEARANCE(
-        "Appearance",
+    APP_SETTINGS(
+        "App Settings",
         "Theme, color, font, and reading style.",
         Icons.Rounded.Palette
+    ),
+    READER(
+        "Reader",
+        "Background, layout, type, and controls.",
+        Icons.AutoMirrored.Rounded.MenuBook
     ),
     LIBRARY(
         "Library",
         "Shelves, badges, and layout.",
         Icons.Rounded.AutoStories
     ),
-    STORAGE(
-        "Storage",
-        "Library folder and device storage.",
+    STORAGE_BACKUP(
+        "Storage & Backup",
+        "Library folder, restore, and device storage.",
         Icons.Rounded.Storage
-    ),
-    BACKUP(
-        "Backup",
-        "Local backup and restore.",
-        Icons.Rounded.CloudSync
     ),
     NOTIFICATIONS(
         "Notifications",
-        "Reading reminders and alerts.",
+        "Reminders and alerts.",
         Icons.Rounded.Notifications
     ),
     ABOUT(
@@ -654,53 +624,32 @@ private enum class SettingsMainSection(
     )
 }
 
-private enum class AppearanceSectionTarget(
-    val label: String,
-    val description: String,
-    val icon: ImageVector
-) {
-    APP(
-        "App",
-        "Theme, font, color, and navigation.",
-        Icons.Rounded.Palette
-    ),
-    READER(
-        "Reader",
-        "Background, layout, type, and controls.",
-        Icons.AutoMirrored.Rounded.MenuBook
-    )
-}
-
 @Composable
 private fun SettingsMainButtons(
     onSelected: (SettingsMainSection) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        SettingsMainSection.entries.forEach { section ->
-            SettingsEntryButton(
-                title = section.label,
-                description = section.description,
-                icon = section.icon,
-                onClick = { onSelected(section) }
-            )
-        }
-    }
-}
-
-@Composable
-private fun AppearanceModeButtons(
-    onSelected: (AppearanceSectionTarget) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        AppearanceSectionTarget.entries.forEach { target ->
-            SettingsEntryButton(
-                title = target.label,
-                description = target.description,
-                icon = target.icon,
-                onClick = { onSelected(target) },
-                selectedColor = MaterialTheme.colorScheme.secondaryContainer,
-                selectedBorderColor = MaterialTheme.colorScheme.secondary
-            )
+    BoxWithConstraints {
+        val columns = if (maxWidth < 620.dp) 1 else 2
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SettingsMainSection.entries.chunked(columns).forEach { row ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    row.forEach { section ->
+                        SettingsEntryButton(
+                            title = section.label,
+                            description = section.description,
+                            icon = section.icon,
+                            onClick = { onSelected(section) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    repeat(columns - row.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
         }
     }
 }
@@ -718,27 +667,13 @@ private fun SettingsOverviewCard(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        SectionSurface(
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.32f),
+            shape = RoundedCornerShape(28.dp),
+            contentPadding = PaddingValues(18.dp)
         ) {
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.75f)
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(12.dp).size(20.dp)
-                )
-            }
-
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
@@ -764,7 +699,6 @@ private fun SettingsOverviewCard(
                 )
             }
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
     }
 }
 
@@ -772,61 +706,65 @@ private fun SettingsOverviewCard(
 private fun SearchResultsSummary(
     groups: List<SearchResultGroup>
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+    SectionSurface(
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+        shape = RoundedCornerShape(26.dp)
     ) {
-        Text(
-            text = "Top Matches",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(horizontal = 4.dp)
-        )
-        groups.forEachIndexed { index, group ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Top Matches",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            groups.forEachIndexed { index, group ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = group.icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(10.dp).size(16.dp)
-                    )
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
+                    ) {
+                        Icon(
+                            imageVector = group.icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(10.dp).size(16.dp)
+                        )
+                    }
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = group.title,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = group.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    Text(
-                        text = group.title,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = group.description,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                if (index != groups.lastIndex) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.24f))
                 }
-            }
-            if (index != groups.lastIndex) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.24f))
             }
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
     }
 }
 
 @Composable
 private fun SettingsNavigationHeader(
+    backLabel: String,
     title: String,
     description: String,
     onBack: () -> Unit
@@ -838,7 +776,7 @@ private fun SettingsNavigationHeader(
     ) {
         AppChromeIconButton(
             icon = Icons.AutoMirrored.Rounded.ArrowBack,
-            contentDescription = "Back",
+            contentDescription = "Back to $backLabel",
             onClick = onBack
         )
         Column(
@@ -846,14 +784,20 @@ private fun SettingsNavigationHeader(
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
+                text = backLabel,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.ExtraBold
             )
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -867,57 +811,73 @@ private fun SettingsEntryButton(
     icon: ImageVector,
     onClick: () -> Unit,
     selectedColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    selectedBorderColor: Color = MaterialTheme.colorScheme.primary
+    selectedBorderColor: Color = MaterialTheme.colorScheme.primary,
+    modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick)
+    SectionSurface(
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+        shape = RoundedCornerShape(26.dp),
+        contentPadding = PaddingValues(16.dp),
+        onClick = onClick
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 15.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
+                .defaultMinSize(minHeight = 124.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Surface(
-                shape = RoundedCornerShape(18.dp),
-                color = selectedColor.copy(alpha = 0.22f)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = selectedBorderColor,
-                    modifier = Modifier.padding(12.dp).size(18.dp)
-                )
+                Surface(
+                    shape = RoundedCornerShape(18.dp),
+                    color = selectedColor.copy(alpha = 0.22f)
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = selectedBorderColor,
+                        modifier = Modifier.padding(12.dp).size(18.dp)
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        modifier = Modifier.padding(8.dp).size(18.dp)
+                    )
+                }
             }
 
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.ExtraBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                modifier = Modifier.size(20.dp)
-            )
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.24f))
     }
 }

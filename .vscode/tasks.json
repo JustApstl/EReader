@@ -1,0 +1,60 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Android: assembleDebug",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "assembleDebug"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "problemMatcher": [
+        "$gradle"
+      ]
+    },
+    {
+      "label": "Android: installDebug",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "installDebug"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "problemMatcher": [
+        "$gradle"
+      ]
+    },
+    {
+      "label": "Android: launch EReader",
+      "type": "shell",
+      "command": "adb",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-n",
+        "com.dyu.ereader/com.dyu.ereader.ui.app.MainActivity"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Android: run EReader on device",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Android: installDebug",
+        "Android: launch EReader"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

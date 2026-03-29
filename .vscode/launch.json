@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run EReader on Android",
+      "type": "node-terminal",
+      "request": "launch",
+      "preLaunchTask": "Android: run EReader on device",
+      "command": "echo 'EReader was installed and launched on the connected Android device. Use Android Studio for full Kotlin/Compose breakpoint debugging.'",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

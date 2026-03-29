@@ -2,6 +2,7 @@ package com.dyu.ereader.ui.home.screens
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
@@ -35,13 +36,21 @@ internal fun HomeDefaultBottomBar(
     liquidGlassEnabled: Boolean,
     hideBetaFeatures: Boolean
 ) {
-    HomeNavigationBar(
-        currentTab = currentTab,
-        onTabSelected = onTabSelected,
-        hideBetaFeatures = hideBetaFeatures,
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 0.dp
-    )
+    Surface(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        shape = RoundedCornerShape(30.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = if (liquidGlassEnabled) 0.82f else 0.96f),
+        tonalElevation = 0.dp,
+        shadowElevation = 10.dp
+    ) {
+        HomeNavigationBar(
+            currentTab = currentTab,
+            onTabSelected = onTabSelected,
+            hideBetaFeatures = hideBetaFeatures,
+            containerColor = Color.Transparent,
+            tonalElevation = 0.dp
+        )
+    }
 }
 
 @Composable
@@ -55,10 +64,10 @@ internal fun HomeFloatingBottomBar(
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        shape = RoundedCornerShape(30.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = if (liquidGlassEnabled) 0.8f else 0.94f),
         tonalElevation = 0.dp,
-        shadowElevation = 0.dp
+        shadowElevation = 12.dp
     ) {
         HomeNavigationBar(
             currentTab = currentTab,
@@ -81,7 +90,7 @@ private fun HomeNavigationBar(
     NavigationBar(
         modifier = Modifier
             .fillMaxWidth()
-            .height(72.dp),
+            .height(82.dp),
         containerColor = containerColor,
         tonalElevation = tonalElevation
     ) {
@@ -120,9 +129,9 @@ private fun HomeNavigationBar(
                 },
                 alwaysShowLabel = true,
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
                     selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                    indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
                     unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )

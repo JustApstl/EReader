@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dyu.ereader.data.model.app.AppTheme
+import com.dyu.ereader.ui.app.theme.UiTokens
 
 @Composable
 fun AddBookCard(
@@ -40,7 +41,7 @@ fun AddBookCard(
 
     val bgColor = if (liquidGlassEnabled) {
         MaterialTheme.colorScheme.surface.copy(alpha = if (isDark) 0.5f else 0.58f)
-    } else MaterialTheme.colorScheme.surface
+    } else MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
 
     val borderColor = if (liquidGlassEnabled) {
         MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.2f else 0.14f)
@@ -50,7 +51,7 @@ fun AddBookCard(
 
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(UiTokens.CardShape)
             .clickable { onClick() }
             .padding(bottom = 4.dp)
     ) {
@@ -59,11 +60,11 @@ fun AddBookCard(
                 .fillMaxWidth()
                 .aspectRatio(0.72f)
                 .shadow(
-                    elevation = if (liquidGlassEnabled) 1.dp else 0.dp,
-                    shape = RoundedCornerShape(16.dp),
+                    elevation = if (liquidGlassEnabled) 2.dp else 8.dp,
+                    shape = UiTokens.CardShape,
                     clip = false
                 ),
-            shape = RoundedCornerShape(16.dp),
+            shape = UiTokens.CardShape,
             color = bgColor,
             border = borderStroke
         ) {
@@ -77,14 +78,14 @@ fun AddBookCard(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(
                         modifier = Modifier
-                            .size(56.dp)
+                            .size(64.dp)
                             .background(placeholderBrush, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Add,
                             contentDescription = null,
-                            modifier = Modifier.size(28.dp),
+                            modifier = Modifier.size(30.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -118,17 +119,18 @@ fun AddBookListItem(
 
     val bgColor = if (liquidGlassEnabled) {
         MaterialTheme.colorScheme.surface.copy(alpha = if (isDark) 0.5f else 0.58f)
-    } else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f)
+    } else MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
 
     Surface(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = UiTokens.CardShape,
         color = bgColor,
         border = BorderStroke(
             1.2.dp,
-            if (liquidGlassEnabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
-        )
+            if (liquidGlassEnabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+        ),
+        shadowElevation = UiTokens.SectionShadowElevation
     ) {
         Row(
             modifier = Modifier

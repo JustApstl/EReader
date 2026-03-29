@@ -30,108 +30,108 @@ val EditorialBodyFont = FontFamily(
 
 val AppTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = EditorialDisplayFont,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 56.sp,
-        lineHeight = 60.sp,
-        letterSpacing = (-1.2).sp
+        fontFamily = EditorialBodyFont,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 50.sp,
+        lineHeight = 54.sp,
+        letterSpacing = (-1.0).sp
     ),
     displayMedium = TextStyle(
-        fontFamily = EditorialDisplayFont,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 46.sp,
-        lineHeight = 50.sp,
-        letterSpacing = (-0.95).sp
+        fontFamily = EditorialBodyFont,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 42.sp,
+        lineHeight = 46.sp,
+        letterSpacing = (-0.8).sp
     ),
     displaySmall = TextStyle(
-        fontFamily = EditorialDisplayFont,
-        fontWeight = FontWeight.Medium,
-        fontSize = 38.sp,
-        lineHeight = 42.sp,
-        letterSpacing = (-0.75).sp
-    ),
-    headlineLarge = TextStyle(
-        fontFamily = EditorialDisplayFont,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 32.sp,
-        lineHeight = 36.sp,
+        fontFamily = EditorialBodyFont,
+        fontWeight = FontWeight.Bold,
+        fontSize = 34.sp,
+        lineHeight = 40.sp,
         letterSpacing = (-0.6).sp
     ),
+    headlineLarge = TextStyle(
+        fontFamily = EditorialBodyFont,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 30.sp,
+        lineHeight = 36.sp,
+        letterSpacing = (-0.5).sp
+    ),
     headlineMedium = TextStyle(
-        fontFamily = EditorialDisplayFont,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 28.sp,
-        lineHeight = 33.sp,
-        letterSpacing = (-0.48).sp
+        fontFamily = EditorialBodyFont,
+        fontWeight = FontWeight.Bold,
+        fontSize = 26.sp,
+        lineHeight = 32.sp,
+        letterSpacing = (-0.32).sp
     ),
     headlineSmall = TextStyle(
-        fontFamily = EditorialDisplayFont,
-        fontWeight = FontWeight.Medium,
-        fontSize = 24.sp,
-        lineHeight = 30.sp,
-        letterSpacing = (-0.34).sp
+        fontFamily = EditorialBodyFont,
+        fontWeight = FontWeight.Bold,
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        letterSpacing = (-0.22).sp
     ),
     titleLarge = TextStyle(
-        fontFamily = EditorialDisplayFont,
-        fontWeight = FontWeight.Medium,
-        fontSize = 21.sp,
-        lineHeight = 27.sp,
-        letterSpacing = (-0.22).sp
+        fontFamily = EditorialBodyFont,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        lineHeight = 26.sp,
+        letterSpacing = (-0.1).sp
     ),
     titleMedium = TextStyle(
         fontFamily = EditorialBodyFont,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.ExtraBold,
         fontSize = 17.sp,
-        lineHeight = 23.sp,
-        letterSpacing = 0.1.sp
+        lineHeight = 22.sp,
+        letterSpacing = 0.sp
     ),
     titleSmall = TextStyle(
         fontFamily = EditorialBodyFont,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         fontSize = 15.sp,
         lineHeight = 20.sp,
-        letterSpacing = 0.1.sp
+        letterSpacing = 0.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = EditorialBodyFont,
         fontWeight = FontWeight.Normal,
         fontSize = 17.sp,
-        lineHeight = 27.sp,
-        letterSpacing = 0.12.sp
+        lineHeight = 26.sp,
+        letterSpacing = 0.08.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = EditorialBodyFont,
         fontWeight = FontWeight.Normal,
         fontSize = 15.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.12.sp
+        lineHeight = 22.sp,
+        letterSpacing = 0.08.sp
     ),
     bodySmall = TextStyle(
         fontFamily = EditorialBodyFont,
         fontWeight = FontWeight.Normal,
         fontSize = 13.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.14.sp
+        lineHeight = 18.sp,
+        letterSpacing = 0.08.sp
     ),
     labelLarge = TextStyle(
         fontFamily = EditorialBodyFont,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.ExtraBold,
         fontSize = 14.sp,
         lineHeight = 18.sp,
-        letterSpacing = 0.16.sp
+        letterSpacing = 0.08.sp
     ),
     labelMedium = TextStyle(
         fontFamily = EditorialBodyFont,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.45.sp
+        letterSpacing = 0.18.sp
     ),
     labelSmall = TextStyle(
         fontFamily = EditorialBodyFont,
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
         lineHeight = 15.sp,
-        letterSpacing = 0.6.sp
+        letterSpacing = 0.16.sp
     )
 )

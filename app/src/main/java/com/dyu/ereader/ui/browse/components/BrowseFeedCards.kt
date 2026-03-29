@@ -48,6 +48,7 @@ import coil.request.ImageRequest
 import com.dyu.ereader.data.model.browse.BrowseBook
 import com.dyu.ereader.data.repository.browse.BROWSE_USER_AGENT
 import com.dyu.ereader.ui.components.books.BookMetadataChip
+import com.dyu.ereader.ui.app.theme.UiTokens
 import kotlinx.coroutines.delay
 import androidx.compose.animation.core.animateFloatAsState
 
@@ -100,11 +101,11 @@ internal fun BrowseBookCard(
     val titleMarqueeModifier = marqueeModifier(titleMarqueeEnabled, book.title.length)
     val authorMarqueeModifier = marqueeModifier(authorMarqueeEnabled, book.author.length)
     val cardColor = if (liquidGlassEnabled) {
-        MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)
+        MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
     } else {
-        MaterialTheme.colorScheme.surfaceContainerLow
+        MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
     }
-    val coverOverlay = MaterialTheme.colorScheme.scrim.copy(alpha = 0.28f)
+    val coverOverlay = MaterialTheme.colorScheme.scrim.copy(alpha = 0.18f)
     Column(
         modifier = modifier
             .graphicsLayer(scaleX = scale, scaleY = scale)
@@ -118,11 +119,11 @@ internal fun BrowseBookCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(0.72f),
-            shape = RoundedCornerShape(12.dp),
+            shape = UiTokens.CardShape,
             color = cardColor,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f)),
             tonalElevation = 0.dp,
-            shadowElevation = 0.dp
+            shadowElevation = UiTokens.SectionShadowElevation
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 BrowseCoverImage(
@@ -150,7 +151,8 @@ internal fun BrowseBookCard(
         Spacer(Modifier.height(8.dp))
         Text(
             text = book.title,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.ExtraBold,
             maxLines = if (titleMarqueeEnabled) 1 else 2,
             overflow = if (titleMarqueeEnabled) TextOverflow.Clip else TextOverflow.Ellipsis,
             color = MaterialTheme.colorScheme.onSurface,
@@ -165,6 +167,16 @@ internal fun BrowseBookCard(
                 overflow = if (authorMarqueeEnabled) TextOverflow.Clip else TextOverflow.Ellipsis,
                 modifier = authorMarqueeModifier
             )
+        }
+        Spacer(Modifier.height(6.dp))
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            item { FormatChip(book.format) }
+            book.languages.firstOrNull()?.takeIf { it.isNotBlank() }?.let { language ->
+                item { FormatChip(language.uppercase()) }
+            }
+            book.downloads?.takeIf { it > 0 }?.let { downloads ->
+                item { FormatChip("${downloads} DL") }
+            }
         }
     }
 }

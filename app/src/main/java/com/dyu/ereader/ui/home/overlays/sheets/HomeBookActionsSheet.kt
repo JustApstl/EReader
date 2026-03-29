@@ -1,6 +1,7 @@
 package com.dyu.ereader.ui.home.overlays.sheets
 
 import android.graphics.BitmapFactory
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.BookmarkBorder
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Favorite
@@ -32,15 +34,11 @@ import androidx.compose.material.icons.rounded.FolderCopy
 import androidx.compose.material.icons.rounded.IosShare
 import androidx.compose.material.icons.rounded.LibraryBooks
 import androidx.compose.material.icons.rounded.NoteAlt
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,12 +60,11 @@ import com.dyu.ereader.ui.components.dialogs.appDialogTextFieldColors
 import com.dyu.ereader.ui.components.dialogs.appTextFieldShape
 import com.dyu.ereader.ui.components.books.BookMetadataChip
 import com.dyu.ereader.ui.components.books.BookPrimaryActionButton
-import com.dyu.ereader.ui.components.menus.AppDropdownMenuItem
 import com.dyu.ereader.ui.components.surfaces.LiquidGlassOverlay
 import com.dyu.ereader.ui.components.surfaces.SectionSurface
 import com.dyu.ereader.ui.components.surfaces.rememberLiquidGlassStyle
+import androidx.compose.ui.window.Dialog
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeBookActionsSheet(
     book: BookItem?,
@@ -86,7 +83,6 @@ fun HomeBookActionsSheet(
     onDeleteCollection: (String) -> Unit
 ) {
     val selectedBook = book ?: return
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var newCollectionName by remember(selectedBook.id) { mutableStateOf("") }
     val coverBitmap = remember(selectedBook.id) {
         selectedBook.coverImage?.let { BitmapFactory.decodeByteArray(it, 0, it.size)?.asImageBitmap() }
@@ -113,20 +109,24 @@ fun HomeBookActionsSheet(
         }
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
-    ) {
-        LazyColumn(
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = 640.dp)
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .heightIn(max = 720.dp),
+            shape = RoundedCornerShape(32.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            tonalElevation = 0.dp,
+            shadowElevation = 16.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f))
         ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 20.dp),
+                contentPadding = PaddingValues(bottom = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
             item {
                 SectionSurface(
                     shape = UiTokens.SettingsCardShape,
@@ -248,15 +248,21 @@ fun HomeBookActionsSheet(
                     contentPadding = PaddingValues(14.dp)
                 ) {
                     Text(
-                        text = "Quick Actions",
+                        text = "Book Actions",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = "Keep the next steps close: open, manage, share, or file this book away.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         BookPrimaryActionButton(
-                            label = "Read",
+                            label = "Read Now",
                             onClick = {
                                 onRead(selectedBook)
                                 onDismiss()
@@ -276,7 +282,7 @@ fun HomeBookActionsSheet(
                     Spacer(Modifier.height(10.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         BookQuickActionButton(
-                            label = if (selectedBook.isFavorite) "Favorite" else "Add Favorite",
+                            label = if (selectedBook.isFavorite) "Favorited" else "Favorite",
                             icon = if (selectedBook.isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                             onClick = {
                                 onToggleFavorite(selectedBook)
@@ -294,50 +300,25 @@ fun HomeBookActionsSheet(
                             modifier = Modifier.weight(1f)
                         )
                     }
-                }
-            }
-
-            item {
-                SectionSurface(
-                    shape = UiTokens.SettingsCardShape,
-                    color = sectionColor,
-                    border = sectionBorder,
-                    tonalElevation = 0.dp,
-                    shadowElevation = 0.dp,
-                    contentPadding = PaddingValues(14.dp)
-                ) {
-                    Text(
-                        text = "More Actions",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
                     Spacer(Modifier.height(10.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        AppDropdownMenuItem(
-                            label = "Export Highlights",
-                            icon = Icons.Rounded.NoteAlt,
-                            onClick = {
-                                onExportHighlights(selectedBook)
-                                onDismiss()
-                            }
-                        )
-                        AppDropdownMenuItem(
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        BookQuickActionButton(
                             label = "Open File",
                             icon = Icons.Rounded.FileOpen,
                             onClick = {
                                 onOpenFile(selectedBook)
                                 onDismiss()
-                            }
+                            },
+                            modifier = Modifier.weight(1f)
                         )
-                        AppDropdownMenuItem(
-                            label = "Delete",
-                            icon = Icons.Rounded.DeleteOutline,
+                        BookQuickActionButton(
+                            label = "Highlights",
+                            icon = Icons.Rounded.NoteAlt,
                             onClick = {
-                                onDelete(selectedBook)
+                                onExportHighlights(selectedBook)
                                 onDismiss()
                             },
-                            isDestructive = true
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -353,12 +334,53 @@ fun HomeBookActionsSheet(
                     contentPadding = PaddingValues(14.dp)
                 ) {
                     Text(
-                        text = "Collections",
+                        text = "Shelves & Collections",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+                    Spacer(Modifier.height(6.dp))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        CollectionInfoChip(
+                            label = if (matchingCollections.isEmpty()) {
+                                "Not saved to a collection"
+                            } else {
+                                "${matchingCollections.size} collection${if (matchingCollections.size == 1) "" else "s"}"
+                            }
+                        )
+                        if (selectedBook.isFavorite) {
+                            CollectionInfoChip(label = "Pinned to favorites")
+                        }
+                    }
                     Spacer(Modifier.height(10.dp))
+                    OutlinedTextField(
+                        value = newCollectionName,
+                        onValueChange = { newCollectionName = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        label = { Text("Create collection") },
+                        shape = appTextFieldShape(),
+                        colors = appDialogTextFieldColors(),
+                        trailingIcon = {
+                            AppChromeIconButton(
+                                icon = Icons.Rounded.Add,
+                                contentDescription = "Create collection",
+                                onClick = {
+                                    val name = newCollectionName.trim()
+                                    if (name.isNotBlank()) {
+                                        onCreateCollection(name, selectedBook)
+                                        newCollectionName = ""
+                                    }
+                                },
+                                size = 32.dp,
+                                iconSize = 17.dp
+                            )
+                        }
+                    )
+                    Spacer(Modifier.height(12.dp))
                     if (collections.isEmpty()) {
                         Text(
                             text = "Create a custom shelf and we’ll keep this book there too.",
@@ -423,9 +445,11 @@ fun HomeBookActionsSheet(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
-                                    TextButton(onClick = { onToggleCollection(shelf.name, selectedBook) }) {
-                                        Text(if (containsBook) "Remove" else "Add")
-                                    }
+                                    CollectionActionButton(
+                                        label = if (containsBook) "Remove" else "Save",
+                                        highlighted = containsBook,
+                                        onClick = { onToggleCollection(shelf.name, selectedBook) }
+                                    )
                                     AppChromeIconButton(
                                         icon = Icons.Rounded.DeleteOutline,
                                         contentDescription = "Delete collection",
@@ -438,33 +462,47 @@ fun HomeBookActionsSheet(
                             }
                         }
                     }
+                }
+            }
 
-                    Spacer(Modifier.height(12.dp))
-                    OutlinedTextField(
-                        value = newCollectionName,
-                        onValueChange = { newCollectionName = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        label = { Text("New collection") },
-                        shape = appTextFieldShape(),
-                        colors = appDialogTextFieldColors(),
-                        trailingIcon = {
-                            AppChromeIconButton(
-                                icon = Icons.Rounded.Add,
-                                contentDescription = "Create collection",
-                                onClick = {
-                                    val name = newCollectionName.trim()
-                                    if (name.isNotBlank()) {
-                                        onCreateCollection(name, selectedBook)
-                                        newCollectionName = ""
-                                    }
-                                },
-                                size = 32.dp,
-                                iconSize = 17.dp
+            item {
+                Surface(
+                    onClick = {
+                        onDelete(selectedBook)
+                        onDismiss()
+                    },
+                    shape = RoundedCornerShape(22.dp),
+                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.72f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.24f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.DeleteOutline,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Column {
+                            Text(
+                                text = "Delete Book",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                text = "Remove this book from your library and collections.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
                             )
                         }
-                    )
+                    }
                 }
+            }
             }
         }
     }
@@ -482,7 +520,7 @@ private fun BookQuickActionButton(
         modifier = modifier,
         shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        border = androidx.compose.foundation.BorderStroke(
+        border = BorderStroke(
             1.dp,
             MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.32f)
         )
@@ -507,5 +545,72 @@ private fun BookQuickActionButton(
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
+    }
+}
+
+@Composable
+private fun CollectionInfoChip(
+    label: String
+) {
+    Surface(
+        shape = RoundedCornerShape(999.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.78f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.CollectionsBookmark,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(14.dp)
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+@Composable
+private fun CollectionActionButton(
+    label: String,
+    highlighted: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(999.dp),
+        color = if (highlighted) {
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.72f)
+        } else {
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.82f)
+        },
+        border = BorderStroke(
+            1.dp,
+            if (highlighted) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+            } else {
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f)
+            }
+        )
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = if (highlighted) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            }
+        )
     }
 }

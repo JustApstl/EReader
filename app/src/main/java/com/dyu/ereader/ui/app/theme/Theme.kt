@@ -26,49 +26,49 @@ import com.dyu.ereader.data.model.app.AppFont
 import com.dyu.ereader.data.model.app.AppTheme
 
 private val NeutralLightColorScheme = lightColorScheme(
-    primary = Color(0xFF425F91),
+    primary = Color(0xFF2C63F6),
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFD8E2FF),
-    onPrimaryContainer = Color(0xFF001A43),
-    secondary = Color(0xFF565F71),
+    primaryContainer = Color(0xFFDCE6FF),
+    onPrimaryContainer = Color(0xFF001849),
+    secondary = Color(0xFF5B657C),
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFDAE2F9),
-    onSecondaryContainer = Color(0xFF131C2B),
-    tertiary = Color(0xFF705575),
+    secondaryContainer = Color(0xFFE2E7F5),
+    onSecondaryContainer = Color(0xFF171D2C),
+    tertiary = Color(0xFF00758C),
     onTertiary = Color.White,
-    tertiaryContainer = Color(0xFFFAD8FD),
-    onTertiaryContainer = Color(0xFF28132E),
-    background = Color(0xFFF9F9FF),
-    onBackground = Color(0xFF191C20),
-    surface = Color(0xFFF9F9FF),
-    onSurface = Color(0xFF191C20),
-    surfaceVariant = Color(0xFFE1E2EC),
-    onSurfaceVariant = Color(0xFF44474F),
-    outline = Color(0xFF74777F),
-    outlineVariant = Color(0xFFC4C6D0)
+    tertiaryContainer = Color(0xFFD0F0F7),
+    onTertiaryContainer = Color(0xFF002830),
+    background = Color(0xFFF3F6FB),
+    onBackground = Color(0xFF151B26),
+    surface = Color(0xFFF7F8FC),
+    onSurface = Color(0xFF151B26),
+    surfaceVariant = Color(0xFFE0E6F2),
+    onSurfaceVariant = Color(0xFF50596D),
+    outline = Color(0xFF7E879A),
+    outlineVariant = Color(0xFFC7CEDA)
 )
 
 private val NeutralDarkColorScheme = darkColorScheme(
-    primary = Color(0xFFAEC6FF),
-    onPrimary = Color(0xFF0C2F60),
-    primaryContainer = Color(0xFF294777),
-    onPrimaryContainer = Color(0xFFD8E2FF),
-    secondary = Color(0xFFBEC6DC),
-    onSecondary = Color(0xFF283141),
-    secondaryContainer = Color(0xFF3E4758),
-    onSecondaryContainer = Color(0xFFDAE2F9),
-    tertiary = Color(0xFFDDBCE0),
-    onTertiary = Color(0xFF3F2844),
-    tertiaryContainer = Color(0xFF573E5C),
-    onTertiaryContainer = Color(0xFFFAD8FD),
-    background = Color(0xFF111318),
-    onBackground = Color(0xFFE2E2E9),
-    surface = Color(0xFF111318),
-    onSurface = Color(0xFFE2E2E9),
-    surfaceVariant = Color(0xFF44474F),
-    onSurfaceVariant = Color(0xFFC4C6D0),
-    outline = Color(0xFF8E9099),
-    outlineVariant = Color(0xFF44474F)
+    primary = Color(0xFFABC6FF),
+    onPrimary = Color(0xFF002D6B),
+    primaryContainer = Color(0xFF0F3F92),
+    onPrimaryContainer = Color(0xFFDBE7FF),
+    secondary = Color(0xFFC3CADB),
+    onSecondary = Color(0xFF2C3445),
+    secondaryContainer = Color(0xFF3F4759),
+    onSecondaryContainer = Color(0xFFE1E7F5),
+    tertiary = Color(0xFF7DD7E7),
+    onTertiary = Color(0xFF003641),
+    tertiaryContainer = Color(0xFF004E5E),
+    onTertiaryContainer = Color(0xFFB0ECF7),
+    background = Color(0xFF0B1220),
+    onBackground = Color(0xFFE5EAF5),
+    surface = Color(0xFF101827),
+    onSurface = Color(0xFFE5EAF5),
+    surfaceVariant = Color(0xFF3F4758),
+    onSurfaceVariant = Color(0xFFC3CAD8),
+    outline = Color(0xFF8E96A8),
+    outlineVariant = Color(0xFF3C4352)
 )
 
 @Composable
@@ -138,25 +138,25 @@ private fun resolveBaseColorScheme(
 
 private fun ColorScheme.toAmoledScheme(): ColorScheme {
     val black = Color(0xFF000000)
-    val surfaceBase = Color(0xFF0A0A0A)
-    val surfaceLow = Color(0xFF111111)
-    val surfaceHigh = Color(0xFF1B1B1B)
+    val surfaceBase = Color(0xFF05070C)
+    val surfaceLow = Color(0xFF0A101B)
+    val surfaceHigh = Color(0xFF121A27)
     return copy(
         background = black,
-        onBackground = Color(0xFFE6E1E5),
+        onBackground = Color(0xFFE5EAF5),
         surface = surfaceBase,
-        onSurface = Color(0xFFE6E1E5),
+        onSurface = Color(0xFFE5EAF5),
         surfaceBright = surfaceHigh,
         surfaceDim = black,
         surfaceContainerLowest = black,
         surfaceContainerLow = surfaceBase,
         surfaceContainer = surfaceLow,
         surfaceContainerHigh = surfaceHigh,
-        surfaceContainerHighest = Color(0xFF232323),
+        surfaceContainerHighest = Color(0xFF1B2431),
         surfaceVariant = surfaceHigh,
-        onSurfaceVariant = Color(0xFF9FA3AA),
-        outline = Color(0xFF676B73),
-        outlineVariant = Color(0xFF35383E)
+        onSurfaceVariant = Color(0xFF9CA6B8),
+        outline = Color(0xFF667286),
+        outlineVariant = Color(0xFF2D3848)
     )
 }
 

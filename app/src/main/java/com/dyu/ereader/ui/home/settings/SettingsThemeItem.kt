@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +24,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import com.dyu.ereader.data.model.app.AppTheme
@@ -47,29 +47,33 @@ internal fun ThemeItem(
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Box(
-            modifier = Modifier
-                .size(44.dp)
-                .background(previewColor, CircleShape)
-                .clip(CircleShape)
-                .border(
+            modifier = Modifier.size(44.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                onClick = onClick,
+                modifier = Modifier.matchParentSize(),
+                shape = CircleShape,
+                color = previewColor,
+                border = androidx.compose.foundation.BorderStroke(
                     width = if (isSelected) 3.dp else 1.dp,
                     color = if (isSelected) {
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                     } else {
                         MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f)
-                    },
-                    shape = CircleShape
+                    }
                 )
-                .clickable(onClick = onClick),
-            contentAlignment = Alignment.Center
-        ) {
-            if (isSelected) {
-                Icon(
-                    imageVector = Icons.Rounded.Check,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = if (previewColor.luminance() > 0.55f) Color.Black else Color.White
-                )
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    if (isSelected) {
+                        Icon(
+                            imageVector = Icons.Rounded.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = if (previewColor.luminance() > 0.55f) Color.Black else Color.White
+                        )
+                    }
+                }
             }
         }
 

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,6 +25,7 @@ import com.dyu.ereader.data.model.update.AppUpdateUiState
 import com.dyu.ereader.ui.browse.screens.BrowseCatalogScreen
 import com.dyu.ereader.ui.home.components.LibraryContent
 import com.dyu.ereader.ui.home.components.LogsArea
+import com.dyu.ereader.ui.components.refresh.EReaderPullRefreshIndicator
 import com.dyu.ereader.ui.home.settings.SettingsArea
 import com.dyu.ereader.ui.home.settings.SettingsEvents
 import com.dyu.ereader.ui.home.settings.cloud.CloudSyncScreen
@@ -329,17 +329,17 @@ private fun HomeLogsPane(
             scope.launch {
                 onRefreshingChange(true)
                 AppLogger.refresh()
-                delay(600)
+                delay(750)
                 onRefreshingChange(false)
             }
         },
         indicator = {
-            PullToRefreshDefaults.Indicator(
-                modifier = Modifier.align(Alignment.TopCenter),
+            EReaderPullRefreshIndicator(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 8.dp),
                 isRefreshing = isRefreshing,
-                state = refreshState,
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                color = MaterialTheme.colorScheme.primary
+                state = refreshState
             )
         }
     ) {

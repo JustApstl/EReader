@@ -19,7 +19,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,6 +41,7 @@ import com.dyu.ereader.data.model.browse.BrowseNavigationGroup
 import com.dyu.ereader.core.locale.extractPublishedYear
 import com.dyu.ereader.ui.components.menus.AppDropdownMenu
 import com.dyu.ereader.ui.components.menus.AppDropdownMenuItem
+import com.dyu.ereader.ui.components.refresh.EReaderPullRefreshIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.History
@@ -176,14 +176,12 @@ internal fun FeedContent(
         state = pullState,
         onRefresh = onRefresh,
         indicator = {
-            PullToRefreshDefaults.Indicator(
+            EReaderPullRefreshIndicator(
                 state = pullState,
                 isRefreshing = isRefreshing,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(top = 8.dp),
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                color = MaterialTheme.colorScheme.primary
+                    .padding(top = 8.dp)
             )
         }
     ) {

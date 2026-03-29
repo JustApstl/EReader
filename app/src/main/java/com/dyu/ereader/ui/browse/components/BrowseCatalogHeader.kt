@@ -2,7 +2,10 @@ package com.dyu.ereader.ui.browse.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -36,6 +39,7 @@ import com.dyu.ereader.data.model.browse.BrowseDownloadTask
 import com.dyu.ereader.ui.components.buttons.AppChromeIconButton
 import com.dyu.ereader.ui.components.menus.AppDropdownMenu
 import com.dyu.ereader.ui.components.menus.AppDropdownMenuItem
+import com.dyu.ereader.ui.components.surfaces.SectionSurface
 
 @Composable
 internal fun BrowseCatalogHeader(
@@ -49,53 +53,72 @@ internal fun BrowseCatalogHeader(
     onDismissDownloads: () -> Unit,
     onDownloadTaskAction: (BrowseDownloadTask) -> Unit
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    SectionSurface(
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
     ) {
-        AppChromeIconButton(
-            icon = Icons.AutoMirrored.Rounded.ArrowBack,
-            contentDescription = "Back",
-            onClick = onBack,
-            liquidGlassEnabled = liquidGlassEnabled
-        )
         Row(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (!iconUrl.isNullOrBlank()) {
-                AsyncImage(
-                    model = iconUrl,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp).clip(androidx.compose.foundation.shape.CircleShape),
-                    contentScale = ContentScale.Fit
-                )
-            } else {
-                Icon(
-                    Icons.Rounded.Language,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(22.dp)
-                )
+            AppChromeIconButton(
+                icon = Icons.AutoMirrored.Rounded.ArrowBack,
+                contentDescription = "Back",
+                onClick = onBack,
+                liquidGlassEnabled = liquidGlassEnabled
+            )
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (!iconUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = iconUrl,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp).clip(androidx.compose.foundation.shape.CircleShape),
+                        contentScale = ContentScale.Fit
+                    )
+                } else {
+                    Icon(
+                        Icons.Rounded.Language,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Column {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.ExtraBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = if (downloadQueue.isEmpty()) {
+                            "Browse feed and discover your next read."
+                        } else {
+                            "${downloadQueue.size} download${if (downloadQueue.size == 1) "" else "s"} in progress or queued."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+            BrowseDownloadsButton(
+                downloadQueue = downloadQueue,
+                expanded = showDownloads,
+                liquidGlassEnabled = liquidGlassEnabled,
+                onToggle = onToggleDownloads,
+                onDismiss = onDismissDownloads,
+                onTaskAction = onDownloadTaskAction
             )
         }
-        BrowseDownloadsButton(
-            downloadQueue = downloadQueue,
-            expanded = showDownloads,
-            liquidGlassEnabled = liquidGlassEnabled,
-            onToggle = onToggleDownloads,
-            onDismiss = onDismissDownloads,
-            onTaskAction = onDownloadTaskAction
-        )
     }
 }
 

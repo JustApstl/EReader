@@ -91,6 +91,7 @@ internal fun BrowseCatalogItem(
     SectionSurface(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(UiTokens.SettingsCardShape)
             .combinedClickable(
                 onClick = {
                     if (showRemove) showRemove = false else onClick()
@@ -261,13 +262,11 @@ internal fun AddCatalogButton(
         border = BorderStroke(1.dp, cardBorderColor),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp,
-        contentPadding = PaddingValues(12.dp)
+        contentPadding = PaddingValues(24.dp, 18.dp),
+        onClick = onClick
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onClick() }
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -292,6 +291,18 @@ internal fun AddCatalogButton(
                     text = "Add another OPDS catalog.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Surface(
+                shape = RoundedCornerShape(999.dp),
+                color = iconChipColor,
+                border = BorderStroke(1.dp, cardBorderColor.copy(alpha = 0.8f))
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(10.dp).size(16.dp)
                 )
             }
         }
